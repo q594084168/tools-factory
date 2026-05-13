@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools Factory</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f172a;--sidebar-bg:#1e293b;--card-bg:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--primary:#3b82f6;--success:#22c55e;--danger:#ef4444;--warning:#f59e0b;--border:#334155;--radius:10px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--sidebar-bg);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:10}
+.sidebar-logo{font-size:1.25rem;font-weight:800;padding:0 24px 24px;border-bottom:1px solid var(--border);margin-bottom:16px;color:var(--primary)}
+.nav-item{display:block;padding:12px 24px;color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .2s;border-left:3px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(59,130,246,.08)}
+.nav-item.active{color:var(--primary);background:rgba(59,130,246,.12);border-left-color:var(--primary)}
+.content{margin-left:220px;flex:1;padding:32px 40px;min-height:100vh}
+.tab-panel{display:none}.tab-panel.active{display:block}
+h1{font-size:1.75rem;font-weight:700;margin-bottom:8px}
+h2{font-size:1.25rem;font-weight:600;margin-bottom:16px}
+.subtitle{color:var(--muted);font-size:.9rem;margin-bottom:32px}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)}
+.btn{padding:10px 22px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{filter:brightness(1.1)}
+.btn-success{background:var(--success);color:#fff}.btn-success:hover{filter:brightness(1.1)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{filter:brightness(1.1)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--border)}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap}
+.domain-grid{display:grid;gap:10px}
+.domain-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+.domain-row .score{color:var(--success);font-size:.85rem;font-weight:600;min-width:60px;text-align:right}
+.domain-row .taken{color:var(--danger)}
+.domain-row .buy-link{color:var(--primary);font-size:.85rem;text-decoration:none;margin-left:12px}.domain-row .buy-link:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;font-size:.9rem;border-bottom:1px solid var(--border)}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-dot.live{background:var(--success)}.status-dot.pending{background:var(--warning)}.status-dot.error{background:var(--danger)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.tag-yes{background:rgba(34,197,94,.15);color:var(--success)}.tag-no{color:var(--muted)}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:160px;padding:8px 0}
+.bar{flex:1;background:var(--primary);border-radius:4px 4px 0 0;min-height:2px;position:relative;transition:height .3s}.bar:hover{filter:brightness(1.3)}
+.log-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;max-height:300px;overflow-y:auto;font-family:'Consolas',monospace;font-size:.8rem;line-height:1.6}
+.log-line{color:var(--muted)}.log-line.success{color:var(--success)}.log-line.error{color:var(--danger)}
+.progress-steps{display:flex;flex-direction:column;gap:8px}
+.progress-step{display:flex;align-items:center;gap:10px;font-size:.85rem}
+.progress-step .icon{width:20px;text-align:center}.icon-done{color:var(--success)}.icon-active{color:var(--primary)}.icon-wait{color:var(--muted)}
+select.template-select{max-width:300px}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-logo">Tools Factory</div>
+    <nav>
+        <a href="#factory" class="nav-item active" data-tab="factory">Site Factory</a>
+        <a href="#sites" class="nav-item" data-tab="sites">My Sites</a>
+        <a href="#monitoring" class="nav-item" data-tab="monitoring">Monitoring</a>
+        <a href="#maintenance" class="nav-item" data-tab="maintenance">Maintenance</a>
+    </nav>
+</div>
+
+<main class="content">
+
+<!-- ===== Site Factory Tab ===== -->
+<div class="tab-panel active" id="tab-factory">
+    <h1>Site Factory</h1>
+    <p class="subtitle">Generate domains, check availability, one-click deploy new tool sites.</p>
+
+    <div class="card">
+        <h2>Step 1: Choose Template</h2>
+        <div class="form-group">
+            <label>Tool Type</label>
+            <select id="templateSelect" class="template-select"></select>
+        </div>
+        <button class="btn btn-primary" id="genDomainsBtn">Generate Domains</button>
+    </div>
+
+    <div class="card" id="domainResultsCard" style="display:none">
+        <h2>Step 2: Select Domains</h2>
+        <p class="subtitle" style="margin-bottom:12px">Click a domain to select it, then buy on NameSilo.</p>
+        <div class="domain-grid" id="domainGrid"></div>
+        <div class="btn-group" style="margin-top:16px">
+            <button class="btn btn-outline" id="regenDomainsBtn">Regenerate</button>
+            <button class="btn btn-success" id="buySelectedBtn">Buy Selected on NameSilo</button>
+        </div>
+    </div>
+
+    <div class="card" id="deployCard" style="display:none">
+        <h2>Step 3: Deploy</h2>
+        <p class="subtitle" style="margin-bottom:12px">Paste domains you purchased, then deploy.</p>
+        <div class="form-group">
+            <label>Domains (one per line)</label>
+            <textarea id="purchasedDomains" rows="4" placeholder="jsonfmt.net&#10;jsonpretty.com"></textarea>
+        </div>
+        <button class="btn btn-success" id="deployBtn">Deploy All</button>
+        <div class="log-box" id="deployLog" style="display:none;margin-top:16px"></div>
+    </div>
+</div>
+
+<!-- ===== My Sites Tab ===== -->
+<div class="tab-panel" id="tab-sites">
+    <h1>My Sites</h1>
+    <p class="subtitle">All deployed tool sites with live status.</p>
+    <div class="card">
+        <table id="sitesTable">
+            <thead><tr>
+                <th>Domain</th><th>Status</th><th>SSL</th><th>GA</th><th>Template</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="sitesTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== Monitoring Tab ===== -->
+<div class="tab-panel" id="tab-monitoring">
+    <h1>Monitoring Center</h1>
+    <p class="subtitle">Traffic overview and revenue estimates.</p>
+
+    <div class="card">
+        <h2>30-Day Traffic</h2>
+        <div class="bar-chart" id="barChart"></div>
+        <p style="text-align:center;color:var(--muted);margin-top:8px" id="totalUVLabel"></p>
+    </div>
+
+    <div class="card">
+        <h2>Per-Site Breakdown</h2>
+        <table>
+            <thead><tr>
+                <th>Domain</th><th>7-Day UV</th><th>RPM</th><th>Daily Revenue</th><th>Monthly Est.</th>
+            </tr></thead>
+            <tbody id="monitoringTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-outline" id="refreshMonitorBtn">Refresh Data</button>
+    </div>
+</div>
+
+<!-- ===== Maintenance Tab ===== -->
+<div class="tab-panel" id="tab-maintenance">
+    <h1>Maintenance Center</h1>
+    <p class="subtitle">Bulk operations and SEO tools for all sites.</p>
+
+    <div class="card">
+        <h2>Quick Actions</h2>
+        <div class="btn-group">
+            <button class="btn btn-primary" id="genReportBtn">Generate Weekly Report</button>
+            <button class="btn btn-outline" id="exportSitesBtn">Export Sites JSON</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Exposure Tools</h2>
+        <p class="subtitle" style="margin-bottom:12px">Generate directory submission text and social snippets.</p>
+        <div class="form-group">
+            <label>Select Site</label>
+            <select id="exposureSiteSelect"></select>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline" id="genDirectoryBtn">Directory Submission Text</button>
+            <button class="btn btn-outline" id="genSocialBtn">Social Share Snippets</button>
+        </div>
+        <div class="log-box" id="exposureOutput" style="display:none;margin-top:16px"></div>
+    </div>
+
+    <div class="card" id="reportCard" style="display:none">
+        <h2>Weekly Report</h2>
+        <div class="log-box" id="reportOutput"></div>
+    </div>
+</div>
+
+</main>
+
+<script>
+const API = 'http://localhost:8899';
+
+// === Tab Navigation ===
+document.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        this.classList.add('active');
+        const tabId = 'tab-' + this.dataset.tab;
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        if (this.dataset.tab === 'sites') loadSites();
+        if (this.dataset.tab === 'monitoring') loadMonitoring();
+        if (this.dataset.tab === 'maintenance') loadMaintenanceSites();
+    });
+});
+
+// === Load Templates ===
+fetch(API + '/api/templates').then(r => r.json()).then(data => {
+    const sel = document.getElementById('templateSelect');
+    data.templates.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.name + ' — ' + t.tool_title;
+        sel.appendChild(opt);
+    });
+});
+
+// === Domain Generation ===
+document.getElementById('genDomainsBtn').addEventListener('click', () => {
+    const template = document.getElementById('templateSelect').value;
+    const grid = document.getElementById('domainGrid');
+    grid.innerHTML = '<p style="color:var(--muted)">Checking domain availability...</p>';
+    document.getElementById('domainResultsCard').style.display = 'block';
+
+    fetch(API + '/api/domains/generate?template=' + template + '&count=10')
+        .then(r => r.json()).then(data => {
+            grid.innerHTML = '';
+            data.domains.forEach(d => {
+                const row = document.createElement('div');
+                row.className = 'domain-row';
+                const avail = d.available;
+                row.innerHTML = `
+                    <span>
+                        <input type="checkbox" class="domain-check" value="${d.domain}" ${!avail ? 'disabled' : ''}>
+                        <strong>${d.domain}</strong>
+                        ${avail ? '' : '<span class="tag tag-no">Taken</span>'}
+                    </span>
+                    <span>
+                        <span class="score ${avail ? '' : 'taken'}">Score: ${d.score}</span>
+                        ${avail ? `<a href="https://www.namesilo.com/account/domains/" target="_blank" class="buy-link">Buy →</a>` : ''}
+                    </span>`;
+                grid.appendChild(row);
+            });
+        });
+});
+
+document.getElementById('regenDomainsBtn').addEventListener('click', () => {
+    document.getElementById('genDomainsBtn').click();
+});
+
+document.getElementById('buySelectedBtn').addEventListener('click', () => {
+    const checked = document.querySelectorAll('.domain-check:checked');
+    if (checked.length === 0) { alert('Select at least one domain first.'); return; }
+    const domains = Array.from(checked).map(c => c.value).join(',');
+    window.open('https://www.namesilo.com/account/domains/', '_blank');
+});
+
+// === Deploy ===
+document.getElementById('deployCard').style.display = 'block';
+
+document.getElementById('deployBtn').addEventListener('click', () => {
+    const domains = document.getElementById('purchasedDomains').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const template = document.getElementById('templateSelect').value;
+    if (domains.length === 0) { alert('Enter at least one domain.'); return; }
+
+    const log = document.getElementById('deployLog');
+    log.style.display = 'block';
+    log.innerHTML = '<p class="log-line">Starting deployment for ' + domains.length + ' site(s)...</p>';
+    document.getElementById('deployBtn').disabled = true;
+    document.getElementById('deployBtn').textContent = 'Deploying...';
+
+    fetch(API + '/api/deploy', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({domains, template})
+    }).then(r => r.json()).then(data => {
+        data.results.forEach(r => {
+            const cls = r.success ? 'success' : 'error';
+            log.innerHTML += `<p class="log-line ${cls}">${r.domain}: ${r.success ? 'Deployed!' : 'Error: ' + (r.error || '')}</p>`;
+            if (r.logs) r.logs.forEach(l => { log.innerHTML += `<p class="log-line">  ${l}</p>`; });
+        });
+        document.getElementById('deployBtn').disabled = false;
+        document.getElementById('deployBtn').textContent = 'Deploy All';
+        log.innerHTML += '<p class="log-line success">Done.</p>';
+    }).catch(err => {
+        log.innerHTML += `<p class="log-line error">Failed: ${err.message}</p>`;
+        document.getElementById('deployBtn').disabled = false;
+        document.getElementById('deployBtn').textContent = 'Deploy All';
+    });
+});
+
+// === My Sites ===
+function loadSites() {
+    fetch(API + '/api/sites').then(r => r.json()).then(data => {
+        const tbody = document.getElementById('sitesTableBody');
+        tbody.innerHTML = '';
+        data.sites.forEach(s => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><a href="https://${s.domain}" target="_blank" style="color:var(--primary)">${s.domain}</a></td>
+                <td><span class="status-dot ${s.status}"></span>${s.status}</td>
+                <td>${s.ssl_status === 'active' ? '<span class="tag tag-yes">OK</span>' : '<span class="tag tag-no">No</span>'}</td>
+                <td>${s.ga_id ? '<span class="tag tag-yes">Yes</span>' : '<span class="tag tag-no">No</span>'}</td>
+                <td>${s.template}</td>
+                <td>
+                    <button class="btn btn-outline btn-sm" onclick="window.open('https://${s.domain}')">Visit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteSite('${s.domain}')">Delete</button>
+                </td>`;
+            tbody.appendChild(row);
+        });
+    });
+}
+
+function deleteSite(domain) {
+    if (!confirm('Delete ' + domain + ' from registry? (Does not delete the actual site)')) return;
+    fetch(API + '/api/sites/' + domain, {method: 'DELETE'}).then(() => loadSites());
+}
+
+// === Monitoring ===
+function loadMonitoring() {
+    fetch(API + '/api/monitoring').then(r => r.json()).then(data => {
+        document.getElementById('totalUVLabel').textContent = 'Total 7-Day UV: ' + data.total_uv_7d;
+
+        const tbody = document.getElementById('monitoringTableBody');
+        tbody.innerHTML = '';
+        data.sites.forEach(s => {
+            tbody.innerHTML += `<tr>
+                <td><strong>${s.domain}</strong></td>
+                <td>${s.uv_7d || 0}</td>
+                <td>$${s.rpm_estimate}</td>
+                <td>$${s.daily_revenue}</td>
+                <td><strong>$${s.monthly_revenue}</strong></td>
+            </tr>`;
+        });
+
+        // Bar chart
+        const chart = document.getElementById('barChart');
+        chart.innerHTML = '';
+        const maxUV = Math.max(...data.sites.map(s => s.uv_7d || 0), 1);
+        data.sites.forEach(s => {
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            const h = Math.max((s.uv_7d || 0) / maxUV * 150, 2);
+            bar.style.height = h + 'px';
+            bar.title = s.domain + ': ' + (s.uv_7d || 0) + ' UV';
+            chart.appendChild(bar);
+        });
+    });
+}
+
+document.getElementById('refreshMonitorBtn').addEventListener('click', loadMonitoring);
+
+// === Maintenance ===
+function loadMaintenanceSites() {
+    fetch(API + '/api/sites').then(r => r.json()).then(data => {
+        const sel = document.getElementById('exposureSiteSelect');
+        sel.innerHTML = '';
+        data.sites.forEach(s => {
+            sel.innerHTML += `<option value="${s.domain}">${s.domain} (${s.template})</option>`;
+        });
+    });
+}
+
+document.getElementById('genReportBtn').addEventListener('click', () => {
+    fetch(API + '/api/report').then(r => r.json()).then(data => {
+        document.getElementById('reportCard').style.display = 'block';
+        document.getElementById('reportOutput').textContent = data.report;
+    });
+});
+
+document.getElementById('exportSitesBtn').addEventListener('click', () => {
+    fetch(API + '/api/sites').then(r => r.json()).then(data => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'sites-export.json';
+        a.click();
+    });
+});
+
+document.getElementById('genDirectoryBtn').addEventListener('click', () => {
+    const domain = document.getElementById('exposureSiteSelect').value;
+    const name = domain.split('.')[0];
+    const text = `Title: ${name} — Free Online Tool\nTagline: Fast, free, no signup required.\nDescription: ${name} is a free online tool that lets you get things done instantly. No uploads needed — everything works right in your browser.\nURL: https://${domain}/\nCategory: Web Tools`;
+    document.getElementById('exposureOutput').style.display = 'block';
+    document.getElementById('exposureOutput').textContent = text;
+});
+
+document.getElementById('genSocialBtn').addEventListener('click', () => {
+    const domain = document.getElementById('exposureSiteSelect').value;
+    const name = domain.split('.')[0];
+    const text = `[Reddit]\nTitle: I made a free tool that might help you — ${name}\nBody: Check out https://${domain}/ — a free online tool I built. No ads (yet), no signup, everything happens in your browser. Let me know what you think!\n\n[Twitter/X]\nJust shipped ${name} — a free online tool. No signup, no uploads, works instantly in your browser.\nhttps://${domain}/`;
+    document.getElementById('exposureOutput').style.display = 'block';
+    document.getElementById('exposureOutput').textContent = text;
+});
+
+// === Initial load ===
+fetch(API + '/api/templates').then(r => r.json()).then(data => {
+    if (data.templates.length === 0) {
+        document.getElementById('domainResultsCard').insertAdjacentHTML('afterend',
+            '<div class="card"><p style="color:var(--warning)">No templates found. Add templates to the templates/ folder, then restart.</p></div>');
+    }
+});
+</script>
+</body>
+</html>
