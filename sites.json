@@ -1,0 +1,16 @@
+{
+  "sites": [
+    {
+      "domain": "compressnow.net",
+      "template": "image-compress",
+      "github_repo": "compressnow",
+      "cloudflare_project": "compressnow",
+      "cloudflare_zone_id": "2da7f3f52dd16631bcaac1791611964b",
+      "ga_id": "G-Z9NW1GSG04",
+      "adsense_id": null,
+      "status": "live",
+      "deployed_at": "2026-05-13T17:42:00Z",
+      "last_updated": "2026-05-13T18:10:00Z"
+    }
+  ]
+}
