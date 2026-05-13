@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{TOOL_DESCRIPTION}}">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="{{TOOL_TITLE}} — {{SITE_NAME}}">
+    <meta property="og:description" content="{{TOOL_DESCRIPTION}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{CANONICAL_URL}}">
+    <meta property="og:site_name" content="{{SITE_NAME}}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{TOOL_TITLE}} — {{SITE_NAME}}">
+    <meta name="twitter:description" content="{{TOOL_DESCRIPTION}}">
+    <link rel="canonical" href="{{CANONICAL_URL}}">
+    <title>{{TOOL_TITLE}} — {{SITE_NAME}}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234F46E5'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3E%F0%9F%94%92%3C/text%3E%3C/svg%3E">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "{{TOOL_TITLE}}",
+        "url": "{{CANONICAL_URL}}",
+        "description": "{{TOOL_DESCRIPTION}}",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "All",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+    </script>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --primary-light: #EEF2FF;
+            --bg: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+            --max-width: 800px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background: rgba(255,255,255,0.92);
+        }
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        .logo span { color: var(--text); }
+        main {
+            flex: 1;
+            max-width: var(--max-width);
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .hero {
+            text-align: center;
+            padding: 56px 0 40px;
+        }
+        .hero h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .hero h1 span { color: var(--primary); }
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 540px;
+            margin: 0 auto 32px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+        .card-lg {
+            padding: 36px;
+            box-shadow: var(--shadow-lg);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .form-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            margin: 10px 0;
+        }
+        .form-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        .range-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .range-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 40px;
+            text-align: right;
+        }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+        }
+        .checkbox-item:hover { background: var(--primary-light); }
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .checkbox-item label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+        }
+        .password-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 6px 6px 18px;
+            transition: border-color 0.2s;
+        }
+        .password-display:focus-within { border-color: var(--primary); }
+        .password-text {
+            flex: 1;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 1.3rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            word-break: break-all;
+            color: var(--text);
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            user-select: all;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-icon { padding: 10px 14px; }
+        .strength-bar-wrapper {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .strength-bar {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            overflow: hidden;
+        }
+        .strength-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s, background 0.4s;
+        }
+        .strength-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: right;
+        }
+        .strength-weak { background: var(--danger); }
+        .strength-fair { background: var(--warning); }
+        .strength-good { background: #14B8A6; }
+        .strength-strong { background: var(--success); }
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .actions-row .btn { flex: 1; }
+        .how-section {
+            padding: 56px 0;
+            text-align: center;
+        }
+        .how-section h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            letter-spacing: -0.02em;
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .step {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .step-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin-bottom: 14px;
+        }
+        .step h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+        .step p { font-size: 0.875rem; color: var(--text-secondary); }
+        .ad-slot {
+            background: var(--card-bg);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ad-slot-inside { margin-top: 24px; min-height: 60px; padding: 12px; }
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 24px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 16px;
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1E293B;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        @media (max-width: 640px) {
+            .hero { padding: 36px 0 24px; }
+            .hero h1 { font-size: 1.7rem; }
+            .card { padding: 20px; }
+            .card-lg { padding: 24px; }
+            .steps { grid-template-columns: 1fr; }
+            .how-section { padding: 36px 0; }
+            .checkbox-group { grid-template-columns: 1fr; }
+            .password-text { font-size: 1.1rem; }
+        }
+    </style>
+    {{GA_ID}}
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="/" class="logo">&#9863; <span>{{SITE_NAME}}</span></a>
+        </div>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>{{TOOL_TITLE}}</h1>
+            <p class="subtitle">{{TOOL_DESCRIPTION}}</p>
+        </section>
+
+        <section class="card card-lg">
+            <div class="form-group">
+                <div class="range-header">
+                    <label for="pw-length">Password Length</label>
+                    <span class="range-value" id="pw-length-value">16</span>
+                </div>
+                <input type="range" id="pw-length" min="8" max="64" value="16" step="1">
+                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-secondary);margin-top:2px;">
+                    <span>8</span><span>64</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Character Types</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pw-uppercase" checked>
+                        <label for="pw-uppercase">Uppercase (A-Z)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pw-lowercase" checked>
+                        <label for="pw-lowercase">Lowercase (a-z)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pw-numbers" checked>
+                        <label for="pw-numbers">Numbers (0-9)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pw-symbols" checked>
+                        <label for="pw-symbols">Symbols (!@#$...)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="password-display">
+                <span class="password-text" id="pw-display"></span>
+                <button class="btn btn-secondary btn-icon" id="pw-copy-btn" title="Copy to clipboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+            </div>
+
+            <div class="strength-bar-wrapper" id="strength-wrapper">
+                <div class="strength-bar"><div class="strength-bar-fill" id="strength-fill" style="width:0;"></div></div>
+                <span class="strength-label" id="strength-label">—</span>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn btn-primary" id="pw-generate-btn">Generate New</button>
+            </div>
+
+            <div class="ad-slot ad-slot-inside">Advertisement</div>
+        </section>
+
+        <div class="ad-slot">Advertisement — {{SITE_NAME}}</div>
+
+        <section class="how-section">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h3>Choose Your Settings</h3>
+                    <p>Set the password length and pick which character types to include.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h3>Generate</h3>
+                    <p>A cryptographically random password is created instantly in your browser.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h3>Copy & Use</h3>
+                    <p>Click to copy your strong new password and paste it wherever you need it.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="ad-slot">Advertisement — {{SITE_NAME}}</div>
+    </main>
+    <footer>
+        <p>All password generation happens locally in your browser &mdash; no passwords are ever sent or stored.</p>
+        <p style="margin-top:4px;">&copy; <span id="footer-year"></span> {{SITE_NAME}}. All rights reserved.</p>
+    </footer>
+    <div class="toast" id="toast"></div>
+    <script>
+    (function() {
+        document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+        var toastTimer = null;
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2000);
+        }
+
+        var pwLengthInput = document.getElementById('pw-length');
+        var pwLengthValue = document.getElementById('pw-length-value');
+        var pwDisplay = document.getElementById('pw-display');
+        var pwGenerateBtn = document.getElementById('pw-generate-btn');
+        var pwCopyBtn = document.getElementById('pw-copy-btn');
+        var strengthFill = document.getElementById('strength-fill');
+        var strengthLabel = document.getElementById('strength-label');
+
+        var checkboxes = {
+            upper: document.getElementById('pw-uppercase'),
+            lower: document.getElementById('pw-lowercase'),
+            number: document.getElementById('pw-numbers'),
+            symbol: document.getElementById('pw-symbols')
+        };
+
+        var UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        var LOWER = 'abcdefghijklmnopqrstuvwxyz';
+        var NUMBERS = '0123456789';
+        var SYMBOLS = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+        pwLengthInput.addEventListener('input', function() {
+            pwLengthValue.textContent = pwLengthInput.value;
+        });
+
+        function getCharPool() {
+            var pool = '';
+            if (checkboxes.upper.checked) pool += UPPER;
+            if (checkboxes.lower.checked) pool += LOWER;
+            if (checkboxes.number.checked) pool += NUMBERS;
+            if (checkboxes.symbol.checked) pool += SYMBOLS;
+            return pool;
+        }
+
+        function getRandomValues(count) {
+            var arr = new Uint32Array(count);
+            if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+                crypto.getRandomValues(arr);
+            } else {
+                for (var i = 0; i < count; i++) {
+                    arr[i] = Math.floor(Math.random() * 4294967296);
+                }
+            }
+            return arr;
+        }
+
+        function generatePassword() {
+            var pool = getCharPool();
+            if (!pool) {
+                pwDisplay.textContent = 'Select at least one character type';
+                pwDisplay.style.color = 'var(--danger)';
+                updateStrength(0);
+                return '';
+            }
+            pwDisplay.style.color = '';
+            var len = parseInt(pwLengthInput.value, 10);
+            var randVals = getRandomValues(len);
+            var result = '';
+            for (var i = 0; i < len; i++) {
+                result += pool[randVals[i] % pool.length];
+            }
+            pwDisplay.textContent = result;
+            updateStrength(len);
+            return result;
+        }
+
+        function updateStrength(len) {
+            var pool = getCharPool();
+            if (!pool) {
+                strengthFill.style.width = '0';
+                strengthFill.className = 'strength-bar-fill';
+                strengthLabel.textContent = '—';
+                strengthLabel.style.color = '';
+                return;
+            }
+            var charTypes = 0;
+            if (checkboxes.upper.checked) charTypes++;
+            if (checkboxes.lower.checked) charTypes++;
+            if (checkboxes.number.checked) charTypes++;
+            if (checkboxes.symbol.checked) charTypes++;
+
+            var score = 0;
+            if (len >= 8) score += 1;
+            if (len >= 12) score += 1;
+            if (len >= 16) score += 1;
+            if (len >= 24) score += 1;
+            if (charTypes >= 2) score += 1;
+            if (charTypes >= 3) score += 1;
+            if (charTypes >= 4) score += 1;
+
+            if (score <= 2) {
+                strengthFill.style.width = '25%';
+                strengthFill.className = 'strength-bar-fill strength-weak';
+                strengthLabel.textContent = 'Weak';
+                strengthLabel.style.color = 'var(--danger)';
+            } else if (score <= 3) {
+                strengthFill.style.width = '50%';
+                strengthFill.className = 'strength-bar-fill strength-fair';
+                strengthLabel.textContent = 'Fair';
+                strengthLabel.style.color = 'var(--warning)';
+            } else if (score <= 5) {
+                strengthFill.style.width = '75%';
+                strengthFill.className = 'strength-bar-fill strength-good';
+                strengthLabel.textContent = 'Good';
+                strengthLabel.style.color = '#14B8A6';
+            } else {
+                strengthFill.style.width = '100%';
+                strengthFill.className = 'strength-bar-fill strength-strong';
+                strengthLabel.textContent = 'Strong';
+                strengthLabel.style.color = 'var(--success)';
+            }
+        }
+
+        function copyPassword() {
+            var text = pwDisplay.textContent;
+            if (!text || text.indexOf('Select') === 0) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showToast('Password copied!');
+                }).catch(function() {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); showToast('Password copied!'); } catch(e) { showToast('Copy failed — select and copy manually'); }
+            document.body.removeChild(ta);
+        }
+
+        pwGenerateBtn.addEventListener('click', generatePassword);
+        pwCopyBtn.addEventListener('click', copyPassword);
+
+        for (var key in checkboxes) {
+            if (checkboxes.hasOwnProperty(key)) {
+                checkboxes[key].addEventListener('change', generatePassword);
+            }
+        }
+        pwLengthInput.addEventListener('change', generatePassword);
+
+        // Initial generation
+        generatePassword();
+    })();
+    </script>
+</body>
+</html>

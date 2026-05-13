@@ -1,0 +1,5 @@
+{
+  "primary": ["compress", "compressimage", "compresspng", "compressjpg", "imgcompress", "shrinkimg", "reduceimage"],
+  "suffixes": ["now", "online", "free", "tool", "io", "pro", "app"],
+  "tlds": [".com", ".net"]
+}

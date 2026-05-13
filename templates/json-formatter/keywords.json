@@ -1,0 +1,5 @@
+{
+  "primary": ["json", "jsonfmt", "jsonformat", "formatjson", "jsonpretty", "jsonview", "jsonbeautify"],
+  "suffixes": ["fmt", "format", "pretty", "viewer", "online", "free", "tool", "io"],
+  "tlds": [".com", ".net", ".io"]
+}

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{TOOL_DESCRIPTION}}">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="{{TOOL_TITLE}} — {{SITE_NAME}}">
+    <meta property="og:description" content="{{TOOL_DESCRIPTION}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{CANONICAL_URL}}">
+    <meta property="og:site_name" content="{{SITE_NAME}}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{TOOL_TITLE}} — {{SITE_NAME}}">
+    <meta name="twitter:description" content="{{TOOL_DESCRIPTION}}">
+    <link rel="canonical" href="{{CANONICAL_URL}}">
+    <title>{{TOOL_TITLE}} — {{SITE_NAME}}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234F46E5'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3EW%3C/text%3E%3C/svg%3E">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "{{TOOL_TITLE}}",
+        "url": "{{CANONICAL_URL}}",
+        "description": "{{TOOL_DESCRIPTION}}",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "All",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+    </script>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --primary-light: #EEF2FF;
+            --bg: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+            --max-width: 800px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background: rgba(255,255,255,0.92);
+        }
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        .logo span { color: var(--text); }
+        main {
+            flex: 1;
+            max-width: var(--max-width);
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .hero {
+            text-align: center;
+            padding: 56px 0 40px;
+        }
+        .hero h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .hero h1 span { color: var(--primary); }
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 540px;
+            margin: 0 auto 32px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+        .card-lg {
+            padding: 36px;
+            box-shadow: var(--shadow-lg);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: inherit;
+            line-height: 1.7;
+            transition: border-color 0.2s;
+            background: var(--card-bg);
+            color: var(--text);
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .stat-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 18px 16px;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.06);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .stat-value.zero { color: var(--text-secondary); }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .reading-time {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 14px;
+            background: var(--primary-light);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .reading-time .rt-icon { font-size: 1.3rem; }
+        .reading-time .rt-value { font-weight: 700; color: var(--primary); }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+        .clear-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+        .how-section {
+            padding: 56px 0;
+            text-align: center;
+        }
+        .how-section h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            letter-spacing: -0.02em;
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .step {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .step-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin-bottom: 14px;
+        }
+        .step h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+        .step p { font-size: 0.875rem; color: var(--text-secondary); }
+        .ad-slot {
+            background: var(--card-bg);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ad-slot-inside { margin-top: 24px; min-height: 60px; padding: 12px; }
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 24px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 16px;
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1E293B;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        @media (max-width: 640px) {
+            .hero { padding: 36px 0 24px; }
+            .hero h1 { font-size: 1.7rem; }
+            .card { padding: 20px; }
+            .card-lg { padding: 24px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps { grid-template-columns: 1fr; }
+            .how-section { padding: 36px 0; }
+            .stat-value { font-size: 1.5rem; }
+        }
+    </style>
+    {{GA_ID}}
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="/" class="logo">&#9863; <span>{{SITE_NAME}}</span></a>
+        </div>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>{{TOOL_TITLE}}</h1>
+            <p class="subtitle">{{TOOL_DESCRIPTION}}</p>
+        </section>
+
+        <section class="card card-lg">
+            <div class="form-group">
+                <label for="text-input">Paste or type your text below</label>
+                <textarea id="text-input" rows="10" placeholder="Start typing or paste your text here..." autofocus></textarea>
+            </div>
+            <div class="clear-row">
+                <button class="btn btn-secondary btn-sm" id="clear-btn">Clear</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value zero" id="stat-words">0</div>
+                    <div class="stat-label">Words</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value zero" id="stat-chars-space">0</div>
+                    <div class="stat-label">Characters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value zero" id="stat-chars-nospace">0</div>
+                    <div class="stat-label">Chars (no spaces)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value zero" id="stat-sentences">0</div>
+                    <div class="stat-label">Sentences</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value zero" id="stat-paragraphs">0</div>
+                    <div class="stat-label">Paragraphs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value zero" id="stat-lines">0</div>
+                    <div class="stat-label">Lines</div>
+                </div>
+            </div>
+
+            <div class="reading-time" id="reading-time" style="display:none;">
+                <span class="rt-icon">&#9202;</span>
+                <span>Estimated reading time: <span class="rt-value" id="rt-value">0 min</span></span>
+            </div>
+
+            <div class="ad-slot ad-slot-inside">Advertisement</div>
+        </section>
+
+        <div class="ad-slot">Advertisement — {{SITE_NAME}}</div>
+
+        <section class="how-section">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h3>Paste or Type</h3>
+                    <p>Enter your text into the box — paste from a document or type directly.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h3>Instant Count</h3>
+                    <p>Stats update automatically as you type. Everything stays in your browser.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h3>Review & Use</h3>
+                    <p>Check word count for essays, character limits for social posts, or reading time estimates.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="ad-slot">Advertisement — {{SITE_NAME}}</div>
+    </main>
+    <footer>
+        <p>All text analysis happens locally in your browser &mdash; no data is ever uploaded or stored.</p>
+        <p style="margin-top:4px;">&copy; <span id="footer-year"></span> {{SITE_NAME}}. All rights reserved.</p>
+    </footer>
+    <div class="toast" id="toast"></div>
+    <script>
+    (function() {
+        document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+        var toastTimer = null;
+        function showToast(msg) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2000);
+        }
+
+        var textInput = document.getElementById('text-input');
+        var clearBtn = document.getElementById('clear-btn');
+
+        var statWords = document.getElementById('stat-words');
+        var statCharsSpace = document.getElementById('stat-chars-space');
+        var statCharsNospace = document.getElementById('stat-chars-nospace');
+        var statSentences = document.getElementById('stat-sentences');
+        var statParagraphs = document.getElementById('stat-paragraphs');
+        var statLines = document.getElementById('stat-lines');
+
+        var readingTimeDiv = document.getElementById('reading-time');
+        var rtValue = document.getElementById('rt-value');
+
+        function updateStats() {
+            var text = textInput.value;
+
+            // Characters with spaces
+            var charsWithSpace = text.length;
+
+            // Characters without spaces
+            var charsNoSpace = text.replace(/\s/g, '').length;
+
+            // Words — match sequences of non-whitespace characters
+            var wordsArr = text.trim().match(/\S+/g);
+            var wordCount = wordsArr ? wordsArr.length : 0;
+
+            // Sentences — split on ., !, ? followed by space or end of string
+            var sentencesArr = text.match(/[^.!?]+[.!?]+/g);
+            var sentenceCount = sentencesArr ? sentencesArr.length : 0;
+
+            // Paragraphs — split on one or more blank lines
+            var paragraphsArr = text.replace(/\r\n/g, '\n').split(/\n\s*\n/).filter(function(p) {
+                return p.trim().length > 0;
+            });
+            var paragraphCount = paragraphsArr.length;
+
+            // Lines — split on newline
+            var lineCount = text.length === 0 ? 0 : text.split(/\r?\n/).length;
+
+            // Update DOM
+            function updateStat(el, val) {
+                el.textContent = val;
+                if (val === 0) { el.classList.add('zero'); } else { el.classList.remove('zero'); }
+            }
+
+            updateStat(statWords, wordCount);
+            updateStat(statCharsSpace, charsWithSpace);
+            updateStat(statCharsNospace, charsNoSpace);
+            updateStat(statSentences, sentenceCount);
+            updateStat(statParagraphs, paragraphCount);
+            updateStat(statLines, lineCount);
+
+            // Reading time: average 238 words per minute
+            if (wordCount > 0) {
+                var minutes = Math.max(1, Math.ceil(wordCount / 238));
+                rtValue.textContent = minutes + ' min';
+                if (minutes === 1) rtValue.textContent = '~1 min';
+                readingTimeDiv.style.display = 'flex';
+            } else {
+                readingTimeDiv.style.display = 'none';
+            }
+        }
+
+        function clearText() {
+            textInput.value = '';
+            updateStats();
+            textInput.focus();
+            showToast('Text cleared');
+        }
+
+        textInput.addEventListener('input', updateStats);
+        clearBtn.addEventListener('click', clearText);
+
+        // Initial update
+        updateStats();
+    })();
+    </script>
+</body>
+</html>
