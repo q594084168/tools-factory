@@ -82,19 +82,29 @@ def api_generate():
 
 @app.route("/api/deploy", methods=["POST"])
 def api_deploy():
-    from deployer import deploy_site
+    from deployer import deploy_site, DEPLOY_DELAY
     data = request.json
     domains = data.get("domains", [])
     template_type = data.get("template")
     ga_id = data.get("ga_id")
+    scene_pages = data.get("scene_pages")
 
     if not domains or not template_type:
         return jsonify({"success": False, "error": "Missing domains or template"}), 400
 
+    if len(domains) > 3:
+        return jsonify({
+            "success": False,
+            "error": f"最多同时部署3个站点，防止触发风控。请分批部署。"
+        }), 400
+
     results = []
-    for domain in domains:
+    for i, domain in enumerate(domains):
+        # Rate limit between sites
+        if i > 0:
+            time.sleep(DEPLOY_DELAY)
         try:
-            result = deploy_site(template_type, domain, ga_id)
+            result = deploy_site(template_type, domain, ga_id, scene_pages=scene_pages)
             results.append(result)
         except Exception as e:
             results.append({"success": False, "domain": domain, "error": str(e)})
@@ -106,23 +116,48 @@ def api_deploy():
 
 @app.route("/api/deploy/stream", methods=["POST"])
 def api_deploy_stream():
-    from deployer import deploy_site
+    from deployer import deploy_site, DEPLOY_DELAY
     data = request.json
     domains = data.get("domains", [])
     template_type = data.get("template")
     ga_id = data.get("ga_id")
+    scene_pages = data.get("scene_pages")
+
+    if len(domains) > 3:
+        return jsonify({"success": False, "error": "最多同时部署3个站点，请分批部署。"}), 400
 
     def generate():
-        for domain in domains:
+        for i, domain in enumerate(domains):
+            if i > 0:
+                time.sleep(DEPLOY_DELAY)
             yield f"data: {json.dumps({'type': 'start', 'domain': domain})}\n\n"
             try:
-                result = deploy_site(template_type, domain, ga_id)
+                result = deploy_site(template_type, domain, ga_id, scene_pages=scene_pages)
                 yield f"data: {json.dumps({'type': 'result', 'domain': domain, 'success': result.get('success', False), 'logs': result.get('logs', [])})}\n\n"
             except Exception as e:
                 yield f"data: {json.dumps({'type': 'error', 'domain': domain, 'error': str(e)})}\n\n"
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
     return Response(generate(), mimetype="text/event-stream")
+
+
+# --- Scene Pages ---
+
+@app.route("/api/scenes/generate", methods=["POST"])
+def api_scenes_generate():
+    from search_analyzer import generate_scene_variants
+    data = request.json or {}
+    template_type = (data.get("template") or "").strip()
+    count = int(data.get("count", 50))
+    if not template_type:
+        return jsonify({"success": False, "error": "Missing template type"}), 400
+    if count > 200:
+        count = 200
+    try:
+        scenes = generate_scene_variants(template_type, count)
+        return jsonify({"success": True, "template": template_type, "count": len(scenes), "scenes": scenes})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # --- Sites Management ---
@@ -132,7 +167,7 @@ def api_list_sites():
     data = load_sites()
     sites = data.get("sites", [])
 
-    # Enrich with Cloudflare status
+    # Enrich with Cloudflare status (fast — 5s timeout per site)
     try:
         cfg = load_config()
         token = cfg["cloudflare"]["api_token"]
@@ -142,10 +177,13 @@ def api_list_sites():
 
         for site in sites:
             project = site.get("cloudflare_project", "")
+            if not project:
+                site["ssl_status"] = "unknown"
+                continue
             try:
                 resp = requests.get(
                     f"https://api.cloudflare.com/client/v4/accounts/{account_id}/pages/projects/{project}/domains",
-                    headers=headers, timeout=10
+                    headers=headers, timeout=5
                 )
                 result = resp.json()
                 domains = result.get("result", [])
@@ -164,10 +202,10 @@ def api_list_sites():
     return jsonify({"sites": sites})
 
 
-@app.route("/api/sites/<domain>", methods=["DELETE"])
-def api_delete_site(domain):
+@app.route("/api/sites/<site_id>", methods=["DELETE"])
+def api_delete_site(site_id):
     data = load_sites()
-    data["sites"] = [s for s in data["sites"] if s["domain"] != domain]
+    data["sites"] = [s for s in data["sites"] if s.get("id") != site_id]
     save_sites(data)
     return jsonify({"success": True})
 
@@ -210,6 +248,79 @@ def api_report():
     from monitor import get_weekly_report
     report, path = get_weekly_report()
     return jsonify({"report": report, "saved_to": path})
+
+
+# --- Search Analysis ---
+
+@app.route("/api/search/analyze", methods=["POST"])
+def api_search_analyze():
+    from search_analyzer import analyze_seed
+    data = request.json or {}
+    seed = (data.get("seed") or "").strip()
+
+    if not seed:
+        return jsonify({"success": False, "error": "请输入种子关键词"}), 400
+    if len(seed) > 60:
+        return jsonify({"success": False, "error": "关键词不能超过60个字符"}), 400
+
+    start = time.time()
+    try:
+        results, tested = analyze_seed(seed)
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    elapsed = int((time.time() - start) * 1000)
+
+    return jsonify({
+        "success": True,
+        "seed": seed,
+        "results": results,
+        "total_tested": tested,
+        "elapsed_ms": elapsed,
+    })
+
+
+@app.route("/api/search/create-template", methods=["POST"])
+def api_search_create_template():
+    from search_analyzer import create_template
+    data = request.json or {}
+    idea = (data.get("idea") or "").strip()
+    tool_title = (data.get("tool_title") or "").strip()
+    tool_description = (data.get("tool_description") or "").strip()
+    keywords_primary = data.get("keywords_primary", [])
+    suffixes_list = data.get("suffixes", [])
+
+    if not idea or not tool_title:
+        return jsonify({"success": False, "error": "缺少必填字段：idea 和 tool_title"}), 400
+
+    try:
+        result = create_template(idea, tool_title, tool_description, keywords_primary, suffixes_list)
+        if result.get("success"):
+            return jsonify(result)
+        else:
+            return jsonify(result), 409
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# --- Tool Rankings ---
+
+@app.route("/api/rankings")
+def api_rankings():
+    from tool_rankings import get_rankings
+    category = request.args.get("category")
+    data = get_rankings(category=category)
+    return jsonify(data)
+
+
+@app.route("/api/rankings/refresh", methods=["POST"])
+def api_rankings_refresh():
+    from tool_rankings import get_rankings
+    data = get_rankings(force_refresh=True)
+    return jsonify(data)
+
+
 
 
 # --- Launch ---

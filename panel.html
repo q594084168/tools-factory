@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tools Factory</title>
+<title>工具工厂</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0f172a;--sidebar-bg:#1e293b;--card-bg:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--primary:#3b82f6;--success:#22c55e;--danger:#ef4444;--warning:#f59e0b;--border:#334155;--radius:10px}
@@ -55,12 +55,13 @@ select.template-select{max-width:300px}
 <body>
 
 <div class="sidebar">
-    <div class="sidebar-logo">Tools Factory</div>
+    <div class="sidebar-logo">工具工厂</div>
     <nav>
-        <a href="#factory" class="nav-item active" data-tab="factory">Site Factory</a>
-        <a href="#sites" class="nav-item" data-tab="sites">My Sites</a>
-        <a href="#monitoring" class="nav-item" data-tab="monitoring">Monitoring</a>
-        <a href="#maintenance" class="nav-item" data-tab="maintenance">Maintenance</a>
+        <a href="#factory" class="nav-item active" data-tab="factory">网站工厂</a>
+        <a href="#sites" class="nav-item" data-tab="sites">我的网站</a>
+        <a href="#monitoring" class="nav-item" data-tab="monitoring">数据监控</a>
+        <a href="#rankings" class="nav-item" data-tab="rankings">工具排行</a>
+        <a href="#maintenance" class="nav-item" data-tab="maintenance">维护中心</a>
     </nav>
 </div>
 
@@ -68,48 +69,90 @@ select.template-select{max-width:300px}
 
 <!-- ===== Site Factory Tab ===== -->
 <div class="tab-panel active" id="tab-factory">
-    <h1>Site Factory</h1>
-    <p class="subtitle">Generate domains, check availability, one-click deploy new tool sites.</p>
+    <h1>网站工厂</h1>
+    <p class="subtitle">生成域名、检测可用性、一键部署新工具站。</p>
+
+    <!-- Step 0: Search Analysis -->
+    <div class="card" id="searchAnalyzerCard">
+        <h2>发现工具创意 <span style="font-weight:400;font-size:.8rem;color:var(--muted)">Search Analysis</span></h2>
+        <p class="subtitle">输入种子关键词，通过 Google 搜索建议发现用户真正需要的工具网站创意。命中的可以一键生成模板。</p>
+        <div class="form-group">
+            <label>种子关键词 (Seed Keyword)</label>
+            <div style="display:flex;gap:10px">
+                <input type="text" id="seedKeyword" placeholder="e.g. image, pdf, json, video, text..." style="flex:1">
+                <button class="btn btn-primary" id="analyzeSeedBtn">开始分析</button>
+            </div>
+        </div>
+        <div id="searchResults" style="display:none;margin-top:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <h3 style="margin:0">分析结果 <span id="searchMeta" style="font-weight:400;font-size:.85rem;color:var(--muted)"></span></h3>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>#</th><th>工具创意</th><th>热度</th><th>匹配</th><th>用户搜索词示例</th><th>操作</th></tr>
+                </thead>
+                <tbody id="searchResultsBody"></tbody>
+            </table>
+        </div>
+        <div id="templateCreateStatus" style="display:none;margin-top:12px"></div>
+    </div>
 
     <div class="card">
-        <h2>Step 1: Choose Template</h2>
+        <h2>第一步：选择模板</h2>
         <div class="form-group">
-            <label>Tool Type</label>
+            <label>工具类型</label>
             <select id="templateSelect" class="template-select"></select>
         </div>
-        <button class="btn btn-primary" id="genDomainsBtn">Generate Domains</button>
+        <button class="btn btn-primary" id="genDomainsBtn">生成域名</button>
     </div>
 
     <div class="card" id="domainResultsCard" style="display:none">
-        <h2>Step 2: Select Domains</h2>
-        <p class="subtitle" style="margin-bottom:12px">Click a domain to select it, then buy on NameSilo.</p>
+        <h2>第二步：选择域名</h2>
+        <p class="subtitle" style="margin-bottom:12px">勾选想要的域名，跳转 NameSilo 购买。</p>
         <div class="domain-grid" id="domainGrid"></div>
         <div class="btn-group" style="margin-top:16px">
-            <button class="btn btn-outline" id="regenDomainsBtn">Regenerate</button>
-            <button class="btn btn-success" id="buySelectedBtn">Buy Selected on NameSilo</button>
+            <button class="btn btn-outline" id="regenDomainsBtn">重新生成</button>
+            <button class="btn btn-success" id="buySelectedBtn">前往 NameSilo 购买</button>
         </div>
     </div>
 
     <div class="card" id="deployCard" style="display:none">
-        <h2>Step 3: Deploy</h2>
-        <p class="subtitle" style="margin-bottom:12px">Paste domains you purchased, then deploy.</p>
+        <h2>第三步：部署</h2>
+        <p class="subtitle" style="margin-bottom:12px">粘贴已购买的域名，开始部署。</p>
         <div class="form-group">
-            <label>Domains (one per line)</label>
+            <label>域名（每行一个）</label>
             <textarea id="purchasedDomains" rows="4" placeholder="jsonfmt.net&#10;jsonpretty.com"></textarea>
         </div>
-        <button class="btn btn-success" id="deployBtn">Deploy All</button>
+        <button class="btn btn-success" id="deployBtn">一键部署</button>
         <div class="log-box" id="deployLog" style="display:none;margin-top:16px"></div>
     </div>
 </div>
 
+    <div class="card" id="sceneCard" style="display:none">
+        <h2>场景化长尾页面</h2>
+        <p class="subtitle" style="margin-bottom:12px">为选中的模板生成场景化长尾页面，每个页面瞄准不同搜索场景。</p>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+            <button class="btn btn-primary" id="btnGenerateScenes" onclick="generateScenes()">生成场景页面</button>
+            <label style="margin:0">数量:</label>
+            <input id="sceneCount" type="number" value="50" min="10" max="200" step="10" style="width:80px">
+        </div>
+        <div id="scenePreview" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <strong>场景页面列表 (<span id="sceneCountLabel">0</span> 个)</strong>
+                <button class="btn btn-outline btn-sm" onclick="clearScenes()">清除</button>
+            </div>
+            <div id="sceneList" style="max-height:300px;overflow-y:auto;font-size:.85rem;border:1px solid var(--border);border-radius:8px;padding:12px"></div>
+        </div>
+    </div>
+
 <!-- ===== My Sites Tab ===== -->
 <div class="tab-panel" id="tab-sites">
-    <h1>My Sites</h1>
-    <p class="subtitle">All deployed tool sites with live status.</p>
+    <h1>我的网站</h1>
+    <p class="subtitle">已部署的所有工具网站及运行状态。</p>
     <div class="card">
         <table id="sitesTable">
             <thead><tr>
-                <th>Domain</th><th>Status</th><th>SSL</th><th>GA</th><th>Template</th><th>Actions</th>
+                <th>域名</th><th>状态</th><th>SSL</th><th>GA</th><th>模板</th><th>操作</th>
             </tr></thead>
             <tbody id="sitesTableBody"></tbody>
         </table>
@@ -118,59 +161,91 @@ select.template-select{max-width:300px}
 
 <!-- ===== Monitoring Tab ===== -->
 <div class="tab-panel" id="tab-monitoring">
-    <h1>Monitoring Center</h1>
-    <p class="subtitle">Traffic overview and revenue estimates.</p>
+    <h1>监控中心</h1>
+    <p class="subtitle">流量概览与收益预估。</p>
 
     <div class="card">
-        <h2>30-Day Traffic</h2>
+        <h2>30天流量</h2>
         <div class="bar-chart" id="barChart"></div>
         <p style="text-align:center;color:var(--muted);margin-top:8px" id="totalUVLabel"></p>
     </div>
 
     <div class="card">
-        <h2>Per-Site Breakdown</h2>
+        <h2>各站明细</h2>
         <table>
             <thead><tr>
-                <th>Domain</th><th>7-Day UV</th><th>RPM</th><th>Daily Revenue</th><th>Monthly Est.</th>
+                <th>域名</th><th>7日UV</th><th>RPM</th><th>日收入</th><th>月预估</th>
             </tr></thead>
             <tbody id="monitoringTableBody"></tbody>
         </table>
     </div>
 
     <div class="btn-group">
-        <button class="btn btn-outline" id="refreshMonitorBtn">Refresh Data</button>
+        <button class="btn btn-outline" id="refreshMonitorBtn">刷新数据</button>
+    </div>
+</div>
+
+<!-- ===== Tool Rankings Tab ===== -->
+<div class="tab-panel" id="tab-rankings">
+    <h1>工具排行</h1>
+    <p class="subtitle">已知在线工具的搜索热度排行，每日自动更新。点击可将关键词填入搜索分析。</p>
+
+    <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div style="display:flex;gap:10px;align-items:center">
+                <label style="margin:0">分类筛选：</label>
+                <select id="rankingCategoryFilter" style="width:auto;min-width:130px">
+                    <option value="">全部</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+                <span style="color:var(--muted);font-size:.85rem" id="rankingsMeta"></span>
+                <button class="btn btn-outline btn-sm" id="refreshRankingsBtn">刷新排行</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>排名</th><th>工具名称</th><th>分类</th><th>搜索热度</th><th>趋势</th><th>搜索词示例</th><th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="rankingsTableBody"></tbody>
+        </table>
     </div>
 </div>
 
 <!-- ===== Maintenance Tab ===== -->
 <div class="tab-panel" id="tab-maintenance">
-    <h1>Maintenance Center</h1>
-    <p class="subtitle">Bulk operations and SEO tools for all sites.</p>
+    <h1>维护中心</h1>
+    <p class="subtitle">批量操作与 SEO 推广工具。</p>
 
     <div class="card">
-        <h2>Quick Actions</h2>
+        <h2>快捷操作</h2>
         <div class="btn-group">
-            <button class="btn btn-primary" id="genReportBtn">Generate Weekly Report</button>
-            <button class="btn btn-outline" id="exportSitesBtn">Export Sites JSON</button>
+            <button class="btn btn-primary" id="genReportBtn">生成周报</button>
+            <button class="btn btn-outline" id="exportSitesBtn">导出站点 JSON</button>
         </div>
     </div>
 
     <div class="card">
-        <h2>Exposure Tools</h2>
-        <p class="subtitle" style="margin-bottom:12px">Generate directory submission text and social snippets.</p>
+        <h2>曝光工具</h2>
+        <p class="subtitle" style="margin-bottom:12px">生成目录提交文本和社交媒体推广片段。</p>
         <div class="form-group">
-            <label>Select Site</label>
+            <label>选择站点</label>
             <select id="exposureSiteSelect"></select>
         </div>
         <div class="btn-group">
-            <button class="btn btn-outline" id="genDirectoryBtn">Directory Submission Text</button>
-            <button class="btn btn-outline" id="genSocialBtn">Social Share Snippets</button>
+            <button class="btn btn-outline" id="genDirectoryBtn">目录提交文本</button>
+            <button class="btn btn-outline" id="genSocialBtn">社交分享片段</button>
         </div>
         <div class="log-box" id="exposureOutput" style="display:none;margin-top:16px"></div>
     </div>
 
     <div class="card" id="reportCard" style="display:none">
-        <h2>Weekly Report</h2>
+        <h2>周报</h2>
         <div class="log-box" id="reportOutput"></div>
     </div>
 </div>
@@ -191,31 +266,173 @@ document.querySelectorAll('.nav-item').forEach(el => {
         document.getElementById(tabId).classList.add('active');
         if (this.dataset.tab === 'sites') loadSites();
         if (this.dataset.tab === 'monitoring') loadMonitoring();
+        if (this.dataset.tab === 'rankings') loadRankings();
         if (this.dataset.tab === 'maintenance') loadMaintenanceSites();
     });
 });
 
-// === Load Templates ===
-fetch(API + '/api/templates').then(r => r.json()).then(data => {
-    const sel = document.getElementById('templateSelect');
-    data.templates.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = t.name + ' — ' + t.tool_title;
-        sel.appendChild(opt);
+// === Load Templates (once at startup, includes empty check) ===
+function initTemplates() {
+    fetch(API + '/api/templates')
+        .then(r => { if (!r.ok) throw new Error('服务器未响应'); return r.json(); })
+        .then(data => {
+            const sel = document.getElementById('templateSelect');
+            if (data.templates.length === 0) {
+                document.getElementById('domainResultsCard').insertAdjacentHTML('afterend',
+                    '<div class="card"><p style="color:var(--warning)">未找到模板，请在 templates/ 文件夹中添加模板后重启。</p></div>');
+                return;
+            }
+            data.templates.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.name + ' — ' + t.tool_title;
+                sel.appendChild(opt);
+            });
+        })
+        .catch(err => {
+            console.error('模板加载失败：', err);
+            const sel = document.getElementById('templateSelect');
+            sel.innerHTML = '<option value="">加载失败，请确认服务已启动</option>';
+        });
+}
+initTemplates();
+
+// === Search Analysis ===
+document.getElementById('analyzeSeedBtn').addEventListener('click', () => {
+    const seed = document.getElementById('seedKeyword').value.trim();
+    if (!seed) { alert('请输入种子关键词'); return; }
+
+    const btn = document.getElementById('analyzeSeedBtn');
+    btn.disabled = true;
+    btn.textContent = '分析中...';
+
+    const tbody = document.getElementById('searchResultsBody');
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">正在通过 Google Suggest 分析搜索数据...</td></tr>';
+    document.getElementById('searchResults').style.display = 'block';
+    document.getElementById('templateCreateStatus').style.display = 'none';
+
+    fetch(API + '/api/search/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({seed})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            tbody.innerHTML = `<tr><td colspan="6" style="color:var(--danger);text-align:center;padding:24px">${data.error}</td></tr>`;
+            return;
+        }
+        document.getElementById('searchMeta').textContent =
+            `分析了 ${data.total_tested} 个组合，耗时 ${(data.elapsed_ms/1000).toFixed(1)}s`;
+        tbody.innerHTML = '';
+        if (!data.results || data.results.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">未找到匹配结果，尝试其他关键词。</td></tr>';
+            return;
+        }
+        data.results.forEach((r, i) => {
+            const scoreColor = r.score >= 80 ? 'var(--success)' : r.score >= 40 ? 'var(--warning)' : 'var(--muted)';
+            const matchLabels = {
+                'exact': '精确匹配',
+                'substring': '包含匹配',
+                'partial': '模糊匹配',
+                'seed_matched': '关键词命中',
+                'no_data': '无数据',
+                'none': '无匹配'
+            };
+            const matchLabel = matchLabels[r.match_type] || r.match_type;
+            const suggestions = (r.raw_suggestions || []).slice(0, 4).join(', ');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${i + 1}</td>
+                <td><strong>${r.idea}</strong></td>
+                <td><span style="color:${scoreColor};font-weight:600">${r.score}</span> <span style="color:var(--muted);font-size:.75rem">/ ${r.demand}</span></td>
+                <td>${matchLabel}</td>
+                <td style="font-size:.8rem;color:var(--muted);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${suggestions || '—'}</td>
+                <td><button class="btn btn-primary btn-sm create-tpl-btn" data-idea="${r.idea.replace(/"/g, '&quot;')}">生成模板</button></td>`;
+            tbody.appendChild(row);
+        });
+
+        document.querySelectorAll('.create-tpl-btn').forEach(b => {
+            b.addEventListener('click', function() { createTemplateFromIdea(this.dataset.idea); });
+        });
+    })
+    .catch(err => {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:var(--danger);text-align:center;padding:24px">分析失败：${err.message}</td></tr>`;
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = '开始分析';
     });
 });
+
+document.getElementById('seedKeyword').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('analyzeSeedBtn').click();
+});
+
+function createTemplateFromIdea(idea) {
+    const words = idea.split(' ');
+    const caps = words.map(w => w.charAt(0).toUpperCase() + w.slice(1));
+    const toolTitle = `Free Online ${caps.join(' ')} — ${caps.join(' ')} Instantly`;
+    const toolDesc = `${caps.join(' ')} online for free. No signup, no upload — everything works in your browser. Fast and easy.`;
+    const primary = [idea.replace(/\s+/g, ''), ...words, idea.replace(/\s+/g, '-')];
+
+    const status = document.getElementById('templateCreateStatus');
+    status.style.display = 'block';
+    status.innerHTML = '<p style="color:var(--muted)">正在生成模板...</p>';
+
+    fetch(API + '/api/search/create-template', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            idea: idea,
+            tool_title: toolTitle,
+            tool_description: toolDesc,
+            keywords_primary: primary,
+            suffixes: ['online', 'free', 'tool', 'io']
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            status.innerHTML = `<p style="color:var(--success);font-weight:600">✓ 模板已创建：<code>${data.template_slug}</code>。刷新页面即可在模板列表中看到。</p>`;
+            // Disable all create buttons for this idea
+            document.querySelectorAll('.create-tpl-btn').forEach(b => {
+                if (b.dataset.idea === idea) {
+                    b.disabled = true;
+                    b.textContent = '已创建';
+                    b.classList.remove('btn-primary');
+                    b.classList.add('btn-success');
+                }
+            });
+        } else {
+            status.innerHTML = `<p style="color:var(--danger)">✗ ${data.error}</p>`;
+        }
+    })
+    .catch(err => {
+        status.innerHTML = `<p style="color:var(--danger)">创建失败：${err.message}</p>`;
+    });
+}
 
 // === Domain Generation ===
 document.getElementById('genDomainsBtn').addEventListener('click', () => {
     const template = document.getElementById('templateSelect').value;
-    const grid = document.getElementById('domainGrid');
-    grid.innerHTML = '<p style="color:var(--muted)">Checking domain availability...</p>';
-    document.getElementById('domainResultsCard').style.display = 'block';
+    if (!template) { alert('请先选择一个工具类型'); return; }
 
-    fetch(API + '/api/domains/generate?template=' + template + '&count=10')
-        .then(r => r.json()).then(data => {
+    const grid = document.getElementById('domainGrid');
+    const btn = document.getElementById('genDomainsBtn');
+    grid.innerHTML = '<p style="color:var(--muted)">正在检测域名可用性...</p>';
+    document.getElementById('domainResultsCard').style.display = 'block';
+    btn.disabled = true;
+    btn.textContent = '检测中...';
+
+    fetch(API + '/api/domains/generate?template=' + encodeURIComponent(template) + '&count=10')
+        .then(r => { if (!r.ok) throw new Error('请求失败'); return r.json(); })
+        .then(data => {
             grid.innerHTML = '';
+            if (!data.domains || data.domains.length === 0) {
+                grid.innerHTML = '<p style="color:var(--warning)">未生成任何域名，请检查模板关键词配置。</p>';
+                return;
+            }
             data.domains.forEach(d => {
                 const row = document.createElement('div');
                 row.className = 'domain-row';
@@ -224,14 +441,21 @@ document.getElementById('genDomainsBtn').addEventListener('click', () => {
                     <span>
                         <input type="checkbox" class="domain-check" value="${d.domain}" ${!avail ? 'disabled' : ''}>
                         <strong>${d.domain}</strong>
-                        ${avail ? '' : '<span class="tag tag-no">Taken</span>'}
+                        ${avail ? '' : '<span class="tag tag-no">已注册</span>'}
                     </span>
                     <span>
-                        <span class="score ${avail ? '' : 'taken'}">Score: ${d.score}</span>
-                        ${avail ? `<a href="https://www.namesilo.com/account/domains/" target="_blank" class="buy-link">Buy →</a>` : ''}
+                        <span class="score ${avail ? '' : 'taken'}">评分：${d.score}</span>
+                        ${avail ? `<a href="https://www.namesilo.com/account/domains/" target="_blank" class="buy-link">购买 →</a>` : ''}
                     </span>`;
                 grid.appendChild(row);
             });
+        })
+        .catch(err => {
+            grid.innerHTML = '<p style="color:var(--danger)">域名检测失败：' + err.message + '</p>';
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = '生成域名';
         });
 });
 
@@ -241,136 +465,331 @@ document.getElementById('regenDomainsBtn').addEventListener('click', () => {
 
 document.getElementById('buySelectedBtn').addEventListener('click', () => {
     const checked = document.querySelectorAll('.domain-check:checked');
-    if (checked.length === 0) { alert('Select at least one domain first.'); return; }
-    const domains = Array.from(checked).map(c => c.value).join(',');
+    if (checked.length === 0) { alert('请先勾选至少一个域名'); return; }
     window.open('https://www.namesilo.com/account/domains/', '_blank');
 });
 
 // === Deploy ===
 document.getElementById('deployCard').style.display = 'block';
+document.getElementById('sceneCard').style.display = 'block';
 
 document.getElementById('deployBtn').addEventListener('click', () => {
     const domains = document.getElementById('purchasedDomains').value.split('\n').map(s => s.trim()).filter(Boolean);
     const template = document.getElementById('templateSelect').value;
-    if (domains.length === 0) { alert('Enter at least one domain.'); return; }
+    if (domains.length === 0) { alert('请至少输入一个域名'); return; }
+    if (domains.length > 3) { alert('最多同时部署3个站点，请分批操作'); return; }
 
     const log = document.getElementById('deployLog');
     log.style.display = 'block';
-    log.innerHTML = '<p class="log-line">Starting deployment for ' + domains.length + ' site(s)...</p>';
+    log.innerHTML = '<p class="log-line">开始部署 ' + domains.length + ' 个网站...</p>';
     document.getElementById('deployBtn').disabled = true;
-    document.getElementById('deployBtn').textContent = 'Deploying...';
+    document.getElementById('deployBtn').textContent = '部署中...';
 
     fetch(API + '/api/deploy', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({domains, template})
+        body: JSON.stringify({domains, template, scene_pages: currentScenes.length > 0 ? currentScenes : undefined})
     }).then(r => r.json()).then(data => {
+        if (data.error) {
+            log.innerHTML += `<p class="log-line error">${data.error}</p>`;
+            return;
+        }
         data.results.forEach(r => {
             const cls = r.success ? 'success' : 'error';
-            log.innerHTML += `<p class="log-line ${cls}">${r.domain}: ${r.success ? 'Deployed!' : 'Error: ' + (r.error || '')}</p>`;
+            log.innerHTML += `<p class="log-line ${cls}">${r.domain}: ${r.success ? '部署成功！' : '错误：' + (r.error || '')}</p>`;
             if (r.logs) r.logs.forEach(l => { log.innerHTML += `<p class="log-line">  ${l}</p>`; });
         });
-        document.getElementById('deployBtn').disabled = false;
-        document.getElementById('deployBtn').textContent = 'Deploy All';
-        log.innerHTML += '<p class="log-line success">Done.</p>';
+        log.innerHTML += '<p class="log-line success">全部完成。</p>';
     }).catch(err => {
-        log.innerHTML += `<p class="log-line error">Failed: ${err.message}</p>`;
+        log.innerHTML += `<p class="log-line error">部署失败：${err.message}</p>`;
+    }).finally(() => {
         document.getElementById('deployBtn').disabled = false;
-        document.getElementById('deployBtn').textContent = 'Deploy All';
+        document.getElementById('deployBtn').textContent = '一键部署';
     });
 });
 
-// === My Sites ===
-function loadSites() {
-    fetch(API + '/api/sites').then(r => r.json()).then(data => {
-        const tbody = document.getElementById('sitesTableBody');
-        tbody.innerHTML = '';
-        data.sites.forEach(s => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><a href="https://${s.domain}" target="_blank" style="color:var(--primary)">${s.domain}</a></td>
-                <td><span class="status-dot ${s.status}"></span>${s.status}</td>
-                <td>${s.ssl_status === 'active' ? '<span class="tag tag-yes">OK</span>' : '<span class="tag tag-no">No</span>'}</td>
-                <td>${s.ga_id ? '<span class="tag tag-yes">Yes</span>' : '<span class="tag tag-no">No</span>'}</td>
-                <td>${s.template}</td>
-                <td>
-                    <button class="btn btn-outline btn-sm" onclick="window.open('https://${s.domain}')">Visit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteSite('${s.domain}')">Delete</button>
-                </td>`;
-            tbody.appendChild(row);
+let currentScenes = [];
+
+async function generateScenes() {
+    const template = document.getElementById('templateSelect').value;
+    const count = parseInt(document.getElementById('sceneCount').value) || 50;
+    const btn = document.getElementById('btnGenerateScenes');
+    btn.textContent = '生成中...';
+    btn.disabled = true;
+    try {
+        const resp = await fetch(API + '/api/scenes/generate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({template: template, count: count})
         });
-    });
+        const data = await resp.json();
+        if (data.success) {
+            currentScenes = data.scenes;
+            document.getElementById('scenePreview').style.display = 'block';
+            document.getElementById('sceneCountLabel').textContent = data.scenes.length;
+            document.getElementById('sceneList').innerHTML = data.scenes.map((s, i) =>
+                `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${i+1}. <strong>/${s.slug}/</strong> — ${s.title}</div>`
+            ).join('');
+        } else {
+            alert('生成失败: ' + (data.error || 'Unknown error'));
+        }
+    } catch(e) {
+        alert('请求失败: ' + e.message);
+    }
+    btn.textContent = '生成场景页面';
+    btn.disabled = false;
 }
 
-function deleteSite(domain) {
-    if (!confirm('Delete ' + domain + ' from registry? (Does not delete the actual site)')) return;
-    fetch(API + '/api/sites/' + domain, {method: 'DELETE'}).then(() => loadSites());
+function clearScenes() {
+    currentScenes = [];
+    document.getElementById('scenePreview').style.display = 'none';
+    document.getElementById('sceneList').innerHTML = '';
+}
+
+// === My Sites ===
+function loadSites() {
+    const tbody = document.getElementById('sitesTableBody');
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">加载中...</td></tr>';
+
+    fetch(API + '/api/sites')
+        .then(r => { if (!r.ok) throw new Error('请求失败'); return r.json(); })
+        .then(data => {
+            tbody.innerHTML = '';
+            if (!data.sites || data.sites.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">暂无站点，先在网站工厂中部署</td></tr>';
+                return;
+            }
+            data.sites.forEach(s => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><a href="https://${s.domain}" target="_blank" style="color:var(--primary)">${s.domain}</a></td>
+                    <td><span class="status-dot ${s.status}"></span>${s.status === 'live' ? '运行中' : s.status === 'pending' ? '等待中' : '错误'}</td>
+                    <td>${s.ssl_status === 'active' ? '<span class="tag tag-yes">正常</span>' : '<span class="tag tag-no">未启用</span>'}</td>
+                    <td>${s.ga_id ? '<span class="tag tag-yes">已接入</span>' : '<span class="tag tag-no">未接入</span>'}</td>
+                    <td>${s.template}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="window.open('https://${s.domain}')">访问</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSite('${s.id}', '${s.domain}')">删除</button>
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        })
+        .catch(err => {
+            tbody.innerHTML = '<tr><td colspan="6" style="color:var(--danger);text-align:center;padding:24px">加载失败：' + err.message + '</td></tr>';
+        });
+}
+
+function deleteSite(id, domain) {
+    if (!confirm('从注册表中删除 ' + domain + '？（不会删除实际网站）')) return;
+    fetch(API + '/api/sites/' + id, {method: 'DELETE'})
+        .then(r => { if (!r.ok) throw new Error('删除失败'); return r.json(); })
+        .then(() => loadSites())
+        .catch(() => alert('删除失败，请确认服务是否运行'));
 }
 
 // === Monitoring ===
 function loadMonitoring() {
-    fetch(API + '/api/monitoring').then(r => r.json()).then(data => {
-        document.getElementById('totalUVLabel').textContent = 'Total 7-Day UV: ' + data.total_uv_7d;
+    const tbody = document.getElementById('monitoringTableBody');
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">加载中...</td></tr>';
 
-        const tbody = document.getElementById('monitoringTableBody');
-        tbody.innerHTML = '';
-        data.sites.forEach(s => {
-            tbody.innerHTML += `<tr>
-                <td><strong>${s.domain}</strong></td>
-                <td>${s.uv_7d || 0}</td>
-                <td>$${s.rpm_estimate}</td>
-                <td>$${s.daily_revenue}</td>
-                <td><strong>$${s.monthly_revenue}</strong></td>
-            </tr>`;
-        });
+    fetch(API + '/api/monitoring')
+        .then(r => { if (!r.ok) throw new Error('请求失败'); return r.json(); })
+        .then(data => {
+            document.getElementById('totalUVLabel').textContent = '近7日总UV：' + data.total_uv_7d;
 
-        // Bar chart
-        const chart = document.getElementById('barChart');
-        chart.innerHTML = '';
-        const maxUV = Math.max(...data.sites.map(s => s.uv_7d || 0), 1);
-        data.sites.forEach(s => {
-            const bar = document.createElement('div');
-            bar.className = 'bar';
-            const h = Math.max((s.uv_7d || 0) / maxUV * 150, 2);
-            bar.style.height = h + 'px';
-            bar.title = s.domain + ': ' + (s.uv_7d || 0) + ' UV';
-            chart.appendChild(bar);
+            tbody.innerHTML = '';
+            if (!data.sites || data.sites.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px">暂无数据</td></tr>';
+                return;
+            }
+            data.sites.forEach(s => {
+                tbody.innerHTML += `<tr>
+                    <td><strong>${s.domain}</strong></td>
+                    <td>${s.uv_7d || 0}</td>
+                    <td>$${s.rpm_estimate}</td>
+                    <td>$${s.daily_revenue}</td>
+                    <td><strong>$${s.monthly_revenue}</strong></td>
+                </tr>`;
+            });
+
+            const chart = document.getElementById('barChart');
+            chart.innerHTML = '';
+            const maxUV = Math.max(...data.sites.map(s => s.uv_7d || 0), 1);
+            data.sites.forEach(s => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const h = Math.max((s.uv_7d || 0) / maxUV * 150, 2);
+                bar.style.height = h + 'px';
+                bar.title = s.domain + '：' + (s.uv_7d || 0) + ' UV';
+                chart.appendChild(bar);
+            });
+        })
+        .catch(err => {
+            tbody.innerHTML = '<tr><td colspan="5" style="color:var(--danger);text-align:center;padding:24px">加载失败：' + err.message + '</td></tr>';
         });
-    });
 }
 
 document.getElementById('refreshMonitorBtn').addEventListener('click', loadMonitoring);
 
+// === Tool Rankings ===
+function loadRankings(category) {
+    category = category || '';
+    const tbody = document.getElementById('rankingsTableBody');
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:24px">加载中...</td></tr>';
+
+    let url = API + '/api/rankings';
+    if (category) url += '?category=' + encodeURIComponent(category);
+
+    fetch(url)
+        .then(r => { if (!r.ok) throw new Error('请求失败'); return r.json(); })
+        .then(data => {
+            document.getElementById('rankingsMeta').textContent =
+                `更新于 ${data.last_updated || '未知'} | 共 ${data.total_tools} 个工具`;
+
+            // Populate category filter
+            const filter = document.getElementById('rankingCategoryFilter');
+            if (filter.options.length <= 1 && data.categories) {
+                data.categories.forEach(c => {
+                    filter.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+            }
+
+            tbody.innerHTML = '';
+            if (!data.tools || data.tools.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:24px">暂无排行数据，点击刷新排行</td></tr>';
+                return;
+            }
+
+            data.tools.forEach(t => {
+                const trendIcon = {up: '↑', down: '↓', stable: '→', new: '●'}[t.trend] || '?';
+                const trendColor = {up: 'var(--success)', down: 'var(--danger)', stable: 'var(--muted)', new: 'var(--primary)'}[t.trend] || 'var(--muted)';
+                const scoreWidth = t.interest_score > 0 ? t.interest_score : 2;
+                const barColor = t.interest_score >= 80 ? 'var(--success)' : t.interest_score >= 50 ? 'var(--primary)' : t.interest_score >= 30 ? 'var(--warning)' : 'var(--muted)';
+                const topQuery = t.query.split(' ')[0];
+                // Show variant coverage as dots: each filled dot = one seed variant where term appeared
+                const vf = t.variant_found || 0;
+                const variantDots = Array.from({length: 3}, (_, i) =>
+                    i < vf ? '●' : '○'
+                ).join('');
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>#${t.rank}</strong></td>
+                    <td><strong>${t.name}</strong></td>
+                    <td><span class="tag tag-yes">${t.category}</span></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;min-width:60px">
+                                <div style="height:100%;width:${scoreWidth}%;background:${barColor};border-radius:3px;transition:width .3s"></div>
+                            </div>
+                            <span style="font-weight:600;font-size:.85rem;min-width:32px" title="覆盖率: ${vf}/3 种子变体 | 平均排名: ${t.avg_raw_pos != null ? '#' + (t.avg_raw_pos + 1).toFixed(1) : '未匹配'}">${t.interest_score}</span>
+                            <span style="font-size:.65rem;color:var(--muted);min-width:24px" title="在 ${vf}/3 个种子变体中匹配">${variantDots}</span>
+                        </div>
+                    </td>
+                    <td style="color:${trendColor};font-weight:700;font-size:1.1rem">${trendIcon}</td>
+                    <td style="font-size:.8rem;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(t.top_suggestions || []).slice(0, 3).join(', ') || '—'}</td>
+                    <td><button class="btn btn-outline btn-sm use-seed-btn" data-seed="${topQuery}">→ 分析</button></td>`;
+                tbody.appendChild(row);
+            });
+
+            // Click to use as seed
+            document.querySelectorAll('.use-seed-btn').forEach(b => {
+                b.addEventListener('click', function() {
+                    document.getElementById('seedKeyword').value = this.dataset.seed;
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    document.querySelector('[data-tab="factory"]').classList.add('active');
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById('tab-factory').classList.add('active');
+                    document.getElementById('seedKeyword').focus();
+                });
+            });
+        })
+        .catch(err => {
+            tbody.innerHTML = `<tr><td colspan="7" style="color:var(--danger);text-align:center;padding:24px">加载失败：${err.message}</td></tr>`;
+        });
+}
+
+document.getElementById('refreshRankingsBtn').addEventListener('click', () => {
+    const btn = document.getElementById('refreshRankingsBtn');
+    btn.disabled = true;
+    btn.textContent = '刷新中...';
+
+    fetch(API + '/api/rankings/refresh', {method: 'POST'})
+        .then(r => r.json())
+        .then(data => {
+            loadRankings(document.getElementById('rankingCategoryFilter').value);
+        })
+        .catch(err => {
+            alert('刷新失败：' + err.message);
+            btn.disabled = false;
+            btn.textContent = '刷新排行';
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = '刷新排行';
+        });
+});
+
+document.getElementById('rankingCategoryFilter').addEventListener('change', function() {
+    loadRankings(this.value);
+});
+
 // === Maintenance ===
 function loadMaintenanceSites() {
-    fetch(API + '/api/sites').then(r => r.json()).then(data => {
-        const sel = document.getElementById('exposureSiteSelect');
-        sel.innerHTML = '';
-        data.sites.forEach(s => {
-            sel.innerHTML += `<option value="${s.domain}">${s.domain} (${s.template})</option>`;
+    fetch(API + '/api/sites')
+        .then(r => { if (!r.ok) throw new Error('请求失败'); return r.json(); })
+        .then(data => {
+            const sel = document.getElementById('exposureSiteSelect');
+            sel.innerHTML = '';
+            if (!data.sites || data.sites.length === 0) {
+                sel.innerHTML = '<option value="">暂无站点</option>';
+                return;
+            }
+            data.sites.forEach(s => {
+                sel.innerHTML += `<option value="${s.domain}">${s.domain} (${s.template})</option>`;
+            });
+        })
+        .catch(() => {
+            document.getElementById('exposureSiteSelect').innerHTML = '<option value="">加载失败</option>';
         });
-    });
 }
 
 document.getElementById('genReportBtn').addEventListener('click', () => {
-    fetch(API + '/api/report').then(r => r.json()).then(data => {
-        document.getElementById('reportCard').style.display = 'block';
-        document.getElementById('reportOutput').textContent = data.report;
-    });
+    document.getElementById('genReportBtn').disabled = true;
+    document.getElementById('genReportBtn').textContent = '生成中...';
+
+    fetch(API + '/api/report')
+        .then(r => { if (!r.ok) throw new Error('请求失败'); return r.json(); })
+        .then(data => {
+            document.getElementById('reportCard').style.display = 'block';
+            document.getElementById('reportOutput').textContent = data.report;
+        })
+        .catch(err => {
+            document.getElementById('reportCard').style.display = 'block';
+            document.getElementById('reportOutput').textContent = '生成失败：' + err.message;
+        })
+        .finally(() => {
+            document.getElementById('genReportBtn').disabled = false;
+            document.getElementById('genReportBtn').textContent = '生成周报';
+        });
 });
 
 document.getElementById('exportSitesBtn').addEventListener('click', () => {
-    fetch(API + '/api/sites').then(r => r.json()).then(data => {
-        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'sites-export.json';
-        a.click();
-    });
+    fetch(API + '/api/sites')
+        .then(r => { if (!r.ok) throw new Error('请求失败'); return r.json(); })
+        .then(data => {
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'sites-export.json';
+            a.click();
+        })
+        .catch(() => alert('导出失败，请确认服务是否运行'));
 });
 
 document.getElementById('genDirectoryBtn').addEventListener('click', () => {
     const domain = document.getElementById('exposureSiteSelect').value;
+    if (!domain) { alert('请先选择一个站点'); return; }
     const name = domain.split('.')[0];
     const text = `Title: ${name} — Free Online Tool\nTagline: Fast, free, no signup required.\nDescription: ${name} is a free online tool that lets you get things done instantly. No uploads needed — everything works right in your browser.\nURL: https://${domain}/\nCategory: Web Tools`;
     document.getElementById('exposureOutput').style.display = 'block';
@@ -379,18 +798,11 @@ document.getElementById('genDirectoryBtn').addEventListener('click', () => {
 
 document.getElementById('genSocialBtn').addEventListener('click', () => {
     const domain = document.getElementById('exposureSiteSelect').value;
+    if (!domain) { alert('请先选择一个站点'); return; }
     const name = domain.split('.')[0];
     const text = `[Reddit]\nTitle: I made a free tool that might help you — ${name}\nBody: Check out https://${domain}/ — a free online tool I built. No ads (yet), no signup, everything happens in your browser. Let me know what you think!\n\n[Twitter/X]\nJust shipped ${name} — a free online tool. No signup, no uploads, works instantly in your browser.\nhttps://${domain}/`;
     document.getElementById('exposureOutput').style.display = 'block';
     document.getElementById('exposureOutput').textContent = text;
-});
-
-// === Initial load ===
-fetch(API + '/api/templates').then(r => r.json()).then(data => {
-    if (data.templates.length === 0) {
-        document.getElementById('domainResultsCard').insertAdjacentHTML('afterend',
-            '<div class="card"><p style="color:var(--warning)">No templates found. Add templates to the templates/ folder, then restart.</p></div>');
-    }
 });
 </script>
 </body>
