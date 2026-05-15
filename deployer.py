@@ -268,18 +268,9 @@ def deploy_site(template_type, domain, ga_id=None, scene_pages=None):
 def _find_zone(domain):
     """Find existing Cloudflare zone ID for a domain."""
     cfg = load_config()
-    token = cfg["cloudflare"]["api_token"]
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "User-Agent": UA,
-    }
-    resp = requests.get(
-        f"https://api.cloudflare.com/client/v4/zones?name={domain}",
-        headers=headers, timeout=10
-    )
-    zones = resp.json().get("result", [])
+    result = cf_api("GET", f"zones?name={domain}")
+    zones = result.get("result", [])
     if zones:
         return zones[0]["id"]
 

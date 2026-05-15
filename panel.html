@@ -255,6 +255,12 @@ select.template-select{max-width:300px}
 <script>
 const API = 'http://localhost:8899';
 
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 // === Tab Navigation ===
 document.querySelectorAll('.nav-item').forEach(el => {
     el.addEventListener('click', function(e) {
@@ -528,7 +534,7 @@ async function generateScenes() {
             document.getElementById('scenePreview').style.display = 'block';
             document.getElementById('sceneCountLabel').textContent = data.scenes.length;
             document.getElementById('sceneList').innerHTML = data.scenes.map((s, i) =>
-                `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${i+1}. <strong>/${s.slug}/</strong> — ${s.title}</div>`
+                `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${i+1}. <strong>/${escapeHtml(s.slug)}/</strong> — ${escapeHtml(s.title)}</div>`
             ).join('');
         } else {
             alert('生成失败: ' + (data.error || 'Unknown error'));

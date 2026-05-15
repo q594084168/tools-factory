@@ -1,5 +1,6 @@
 """Template engine — replaces placeholders in tool site templates."""
 
+import html
 import json
 import shutil
 from pathlib import Path
@@ -163,16 +164,22 @@ def _build_sitemap(domain, scene_pages):
 
 def _build_scene_page(scene, replacements, all_scenes):
     """Build HTML for one scene-targeted sub-page with FAQ Schema and internal links."""
-    site_name = replacements["site_name"]
+    site_name = html.escape(replacements["site_name"])
     ga_script = replacements["ga_id"]
     domain = replacements["domain"]
+
+    # Escape all user-controllable data
+    esc_title = html.escape(scene["title"])
+    esc_desc = html.escape(scene["description"])
+    esc_scenario = html.escape(scene["scenario"])
+    esc_tool_desc = html.escape(replacements["tool_description"])
 
     faq_items = scene.get("faqs", [])
     faq_json = json.dumps([{
         "@type": "Question",
         "name": faq["q"],
         "acceptedAnswer": {"@type": "Answer", "text": faq["a"]}
-    } for faq in faq_items])
+    } for faq in faq_items]).replace('</', '<\\/')
 
     breadcrumb_json = json.dumps({
         "@context": "https://schema.org",
@@ -181,30 +188,41 @@ def _build_scene_page(scene, replacements, all_scenes):
             {"@type": "ListItem", "position": 1, "name": "Home", "item": f"https://{domain}/"},
             {"@type": "ListItem", "position": 2, "name": scene["scenario"], "item": f"https://{domain}/{scene['slug']}/"},
         ]
-    })
+    }).replace('</', '<\\/')
+
+    software_json = json.dumps({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": scene["title"],
+        "url": f"https://{domain}/{scene['slug']}/",
+        "description": scene["description"],
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "All",
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}
+    }).replace('</', '<\\/')
 
     siblings = [s for s in all_scenes if s["slug"] != scene["slug"]]
     related_links = ""
     for sib in siblings[:6]:
-        related_links += f'                    <li><a href="/{sib["slug"]}/">{sib["scenario"]}</a></li>\n'
+        related_links += f'                    <li><a href="/{sib["slug"]}/">{html.escape(sib["scenario"])}</a></li>\n'
 
     faq_html = ""
     for faq in faq_items:
-        faq_html += f'                <div class="faq-item">\n                    <h3>{faq["q"]}</h3>\n                    <p>{faq["a"]}</p>\n                </div>\n'
+        faq_html += f'                <div class="faq-item">\n                    <h3>{html.escape(faq["q"])}</h3>\n                    <p>{html.escape(faq["a"])}</p>\n                </div>\n'
 
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{scene['description']}">
+    <meta name="description" content="{esc_desc}">
     <meta name="robots" content="index, follow">
-    <meta property="og:title" content="{scene['title']}">
-    <meta property="og:description" content="{scene['description']}">
+    <meta property="og:title" content="{esc_title}">
+    <meta property="og:description" content="{esc_desc}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://{domain}/{scene['slug']}/">
     <link rel="canonical" href="https://{domain}/{scene['slug']}/">
-    <title>{scene['title']}</title>
+    <title>{esc_title}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -238,16 +256,7 @@ def _build_scene_page(scene, replacements, all_scenes):
     {breadcrumb_json}
     </script>
     <script type="application/ld+json">
-    {{
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "{scene['title']}",
-        "url": "https://{domain}/{scene['slug']}/",
-        "description": "{scene['description']}",
-        "applicationCategory": "UtilityApplication",
-        "operatingSystem": "All",
-        "offers": {{"@type": "Offer", "price": "0", "priceCurrency": "USD"}}
-    }}
+    {software_json}
     </script>
 </head>
 <body>
@@ -262,10 +271,10 @@ def _build_scene_page(scene, replacements, all_scenes):
         </div>
     </header>
     <main>
-        <div class="breadcrumb"><a href="/">Home</a> / {scene['scenario']}</div>
+        <div class="breadcrumb"><a href="/">Home</a> / {esc_scenario}</div>
         <section class="scene-hero">
-            <h1>{scene['title']}</h1>
-            <p class="subtitle">{scene['description']}</p>
+            <h1>{esc_title}</h1>
+            <p class="subtitle">{esc_desc}</p>
         </section>
         <section class="tool-area">
             <textarea id="toolInput" placeholder="Paste or upload your content here..."></textarea>
@@ -279,9 +288,9 @@ def _build_scene_page(scene, replacements, all_scenes):
             <div class="ad-slot"><div class="ad-placeholder">Advertisement</div></div>
         </section>
         <section class="scene-body">
-            <h2>About {scene['scenario']}</h2>
-            <p>This tool helps you {scene['scenario'].lower()}. {replacements['tool_description']} No downloads or installations required — everything runs directly in your browser.</p>
-            <h2>How to {scene['scenario']}</h2>
+            <h2>About {esc_scenario}</h2>
+            <p>This tool helps you {esc_scenario.lower()}. {esc_tool_desc} No downloads or installations required — everything runs directly in your browser.</p>
+            <h2>How to {esc_scenario}</h2>
             <p>Step 1: Upload or paste your content into the tool above.</p>
             <p>Step 2: Click "Process Now" and wait a few seconds.</p>
             <p>Step 3: Copy or download the result. Done.</p>
