@@ -168,6 +168,44 @@
             color: var(--color-text-muted);
         }
 
+        /* === Batch Chips === */
+        .batch-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            justify-content: center;
+        }
+        .batch-chip {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: var(--color-text);
+        }
+        .batch-chip .remove {
+            color: var(--color-danger);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .batch-chip.active {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-primary);
+        }
+        .file-count {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin-bottom: 8px;
+        }
+
         /* === Controls === */
         .controls { padding: 20px 0 40px; }
 
@@ -246,6 +284,78 @@
         .quality-control input[type="range"] {
             flex: 1;
             accent-color: var(--color-primary);
+        }
+
+        /* === Mode Toggle === */
+        .mode-toggle {
+            display: flex;
+            gap: 4px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 3px;
+        }
+        .mode-toggle button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: transparent;
+            color: #64748b;
+            font-family: inherit;
+        }
+        .mode-toggle button.active {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        /* === Target Size Input === */
+        .target-input {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .target-input input {
+            width: 70px;
+            padding: 8px 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .target-input span {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        /* === Format Select === */
+        .format-select select {
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: #fff;
+            font-family: inherit;
+        }
+
+        /* === Progress Bar === */
+        .progress-bar {
+            width: 100%;
+            max-width: 600px;
+            height: 6px;
+            background: var(--color-border);
+            border-radius: 3px;
+            margin: 0 auto 16px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--color-primary);
+            border-radius: 3px;
+            transition: width 0.3s;
+            width: 0%;
         }
 
         /* === Buttons === */
@@ -430,6 +540,9 @@
                 <h1>{{TOOL_TITLE}}</h1>
                 <p class="subtitle">{{TOOL_DESCRIPTION}}</p>
 
+                <div class="batch-list" id="batchList"></div>
+                <p class="file-count" id="fileCount"></p>
+
                 <div class="upload-zone" id="uploadZone">
                     <div class="upload-zone__inner">
                         <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -437,11 +550,13 @@
                             <polyline points="17 8 12 3 7 8"/>
                             <line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
-                        <p class="upload-zone__text">Drop your image here, or <span class="upload-zone__link">click to browse</span></p>
-                        <p class="upload-zone__formats">Supports PNG, JPEG, WebP — Max 25MB</p>
-                        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" hidden>
+                        <p class="upload-zone__text">Drop images here, or <span class="upload-zone__link">click to browse</span></p>
+                        <p class="upload-zone__formats">PNG, JPEG, WebP — Up to 20 files, 25MB each</p>
+                        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple hidden>
                     </div>
                 </div>
+
+                <div class="progress-bar" id="progressBar"><div class="fill" id="progressFill"></div></div>
 
                 <!-- AdSense Slot 1 -->
                 <div class="ad-slot" id="adSlot1">
@@ -462,34 +577,55 @@
                     <div class="preview-card">
                         <h2>Compressed</h2>
                         <div id="compressedPreview" class="compressed-placeholder">
-                            <p>Adjust quality and click compress</p>
+                            <p>Adjust settings and click Compress</p>
                         </div>
                         <p class="file-info" id="compressedInfo"></p>
                     </div>
                 </div>
 
                 <div class="control-row">
-                    <div class="quality-control">
+                    <div class="mode-toggle">
+                        <button class="active" id="modeQuality">Quality</button>
+                        <button id="modeTarget">Target Size</button>
+                    </div>
+                    <div class="quality-control" id="qualityGroup">
                         <label for="qualitySlider">Quality: <span id="qualityValue">80%</span></label>
                         <input type="range" id="qualitySlider" min="10" max="100" value="80" step="1">
                     </div>
-                    <button id="compressBtn" class="btn btn-primary">Compress Image</button>
-                    <button id="downloadBtn" class="btn btn-success" disabled>Download Compressed</button>
+                    <div class="target-input" id="targetGroup" style="display:none">
+                        <span>Target:</span>
+                        <input type="number" id="targetSizeInput" value="100" min="1" max="25000" step="1">
+                        <span>KB</span>
+                    </div>
+                    <div class="format-select">
+                        <select id="formatSelect">
+                            <option value="keep">Keep Original Format</option>
+                            <option value="image/jpeg">JPEG</option>
+                            <option value="image/png">PNG</option>
+                            <option value="image/webp">WebP</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="compression-stats" id="compressionStats" style="display:none;">
                     <div class="stat">
-                        <span class="stat__label">Original Size</span>
+                        <span class="stat__label">Original</span>
                         <span class="stat__value" id="origSize">—</span>
                     </div>
                     <div class="stat">
-                        <span class="stat__label">Compressed Size</span>
+                        <span class="stat__label">Compressed</span>
                         <span class="stat__value" id="compSize">—</span>
                     </div>
                     <div class="stat">
                         <span class="stat__label">Saved</span>
                         <span class="stat__value stat__value--highlight" id="savedPercent">—</span>
                     </div>
+                </div>
+
+                <div class="btn-group" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                    <button id="compressBtn" class="btn btn-primary">Compress</button>
+                    <button id="downloadBtn" class="btn btn-success" disabled>Download</button>
+                    <button id="downloadAllBtn" class="btn btn-outline" style="display:none">Download All (ZIP)</button>
                 </div>
             </div>
         </section>
@@ -542,167 +678,305 @@
     (function() {
         'use strict';
 
-        const uploadZone = document.getElementById('uploadZone');
-        const fileInput = document.getElementById('fileInput');
-        const compressBtn = document.getElementById('compressBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const qualitySlider = document.getElementById('qualitySlider');
-        const qualityValue = document.getElementById('qualityValue');
-        const previewImage = document.getElementById('previewImage');
-        const compressedPreview = document.getElementById('compressedPreview');
-        const originalInfo = document.getElementById('originalInfo');
-        const compressedInfo = document.getElementById('compressedInfo');
-        const compressionStats = document.getElementById('compressionStats');
-        const controls = document.getElementById('controls');
-        const origSize = document.getElementById('origSize');
-        const compSize = document.getElementById('compSize');
-        const savedPercent = document.getElementById('savedPercent');
+        var uploadZone = document.getElementById('uploadZone'),
+            fileInput = document.getElementById('fileInput'),
+            compressBtn = document.getElementById('compressBtn'),
+            downloadBtn = document.getElementById('downloadBtn'),
+            downloadAllBtn = document.getElementById('downloadAllBtn'),
+            qualitySlider = document.getElementById('qualitySlider'),
+            qualityValue = document.getElementById('qualityValue'),
+            previewImage = document.getElementById('previewImage'),
+            compressedPreview = document.getElementById('compressedPreview'),
+            originalInfo = document.getElementById('originalInfo'),
+            compressedInfo = document.getElementById('compressedInfo'),
+            compressionStats = document.getElementById('compressionStats'),
+            controls = document.getElementById('controls'),
+            origSizeEl = document.getElementById('origSize'),
+            compSizeEl = document.getElementById('compSize'),
+            savedPercent = document.getElementById('savedPercent'),
+            modeQuality = document.getElementById('modeQuality'),
+            modeTarget = document.getElementById('modeTarget'),
+            targetGroup = document.getElementById('targetGroup'),
+            qualityGroup = document.getElementById('qualityGroup'),
+            targetSizeInput = document.getElementById('targetSizeInput'),
+            formatSelect = document.getElementById('formatSelect'),
+            batchList = document.getElementById('batchList'),
+            fileCount = document.getElementById('fileCount'),
+            progressBar = document.getElementById('progressBar'),
+            progressFill = document.getElementById('progressFill');
 
-        let originalFile = null;
-        let compressedBlob = null;
+        var files = [], compressedResults = [], currentFileIdx = 0, currentMode = 'quality';
+
+        function formatSize(b) {
+            if (b < 1024) return b + ' B';
+            if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+            return (b / (1048576)).toFixed(2) + ' MB';
+        }
+
+        function showToast(m) {
+            var t = document.getElementById('toast');
+            t.textContent = m;
+            t.classList.add('show');
+            clearTimeout(t._t);
+            t._t = setTimeout(function() { t.classList.remove('show'); }, 2500);
+        }
 
         // === File Input ===
-        uploadZone.addEventListener('click', function() {
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
-        });
+        uploadZone.addEventListener('click', function() { fileInput.click(); });
+        fileInput.addEventListener('change', function(e) { addFiles(e.target.files); fileInput.value = ''; });
 
         // === Drag & Drop ===
-        uploadZone.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            uploadZone.classList.add('drag-over');
-        });
-
-        uploadZone.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            uploadZone.classList.remove('drag-over');
-        });
-
+        uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+        uploadZone.addEventListener('dragleave', function(e) { e.preventDefault(); uploadZone.classList.remove('drag-over'); });
         uploadZone.addEventListener('drop', function(e) {
             e.preventDefault();
             uploadZone.classList.remove('drag-over');
-            if (e.dataTransfer.files.length > 0) {
-                handleFile(e.dataTransfer.files[0]);
-            }
+            addFiles(e.dataTransfer.files);
         });
 
-        function handleFile(file) {
-            if (!file.type.match(/^image\/(png|jpeg|webp)$/)) {
-                showToast('Please select a PNG, JPEG, or WebP image.');
-                return;
+        function addFiles(newFiles) {
+            var added = 0;
+            for (var i = 0; i < newFiles.length; i++) {
+                var f = newFiles[i];
+                if (!f.type.match(/^image\/(png|jpeg|webp)$/)) continue;
+                if (f.size > 25 * 1024 * 1024) { showToast(f.name + ' is too large (>25MB)'); continue; }
+                if (files.length >= 20) { showToast('Max 20 files'); break; }
+                var dup = false;
+                for (var j = 0; j < files.length; j++) {
+                    if (files[j].name === f.name && files[j].size === f.size) { dup = true; break; }
+                }
+                if (!dup) { files.push(f); added++; }
             }
-            if (file.size > 25 * 1024 * 1024) {
-                showToast('File is too large. Maximum size is 25MB.');
-                return;
+            if (added > 0) { renderBatchList(); showFile(0); controls.style.display = 'block'; controls.scrollIntoView({ behavior: 'smooth' }); }
+        }
+
+        function renderBatchList() {
+            batchList.innerHTML = '';
+            fileCount.textContent = files.length + ' file' + (files.length > 1 ? 's' : '');
+            for (var i = 0; i < files.length; i++) {
+                (function(idx) {
+                    var chip = document.createElement('span');
+                    chip.className = 'batch-chip' + (idx === currentFileIdx ? ' active' : '');
+                    chip.innerHTML = '<span>' + files[idx].name + '</span><span class="remove">×</span>';
+                    chip.querySelector('.remove').addEventListener('click', function(e) { e.stopPropagation(); removeFile(idx); });
+                    chip.addEventListener('click', function() { showFile(idx); });
+                    batchList.appendChild(chip);
+                })(i);
             }
+            downloadAllBtn.style.display = files.length > 1 ? 'inline-flex' : 'none';
+        }
 
-            originalFile = file;
-            compressedBlob = null;
+        function removeFile(idx) {
+            files.splice(idx, 1);
+            compressedResults = [];
+            if (files.length === 0) { controls.style.display = 'none'; batchList.innerHTML = ''; fileCount.textContent = ''; downloadAllBtn.style.display = 'none'; return; }
+            if (currentFileIdx >= files.length) currentFileIdx = files.length - 1;
+            renderBatchList();
+            showFile(currentFileIdx);
+        }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            originalInfo.textContent = formatSize(file.size) + ' — ' + file.type.replace('image/', '').toUpperCase();
-            compressedPreview.innerHTML = '<p>Adjust quality and click compress</p>';
+        function showFile(idx) {
+            currentFileIdx = idx;
+            var f = files[idx];
+            var r = new FileReader();
+            r.onload = function(e) { previewImage.src = e.target.result; };
+            r.readAsDataURL(f);
+            originalInfo.textContent = formatSize(f.size) + ' — ' + f.type.replace('image/', '').toUpperCase();
+            compressedPreview.innerHTML = '<p>Adjust settings and click Compress</p>';
             compressedInfo.textContent = '';
             compressionStats.style.display = 'none';
             downloadBtn.disabled = true;
-            controls.style.display = 'block';
-
-            controls.scrollIntoView({ behavior: 'smooth' });
+            renderBatchList();
+            // Load dimensions
+            var img = new Image();
+            img.onload = function() { originalInfo.textContent = formatSize(f.size) + ' — ' + f.type.replace('image/', '').toUpperCase() + ' — ' + img.width + '×' + img.height; };
+            img.src = URL.createObjectURL(f);
         }
 
-        function formatSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-        }
+        // === Mode Toggle ===
+        modeQuality.addEventListener('click', function() {
+            currentMode = 'quality';
+            modeQuality.classList.add('active'); modeTarget.classList.remove('active');
+            qualityGroup.style.display = 'flex'; targetGroup.style.display = 'none';
+        });
+        modeTarget.addEventListener('click', function() {
+            currentMode = 'target';
+            modeTarget.classList.add('active'); modeQuality.classList.remove('active');
+            qualityGroup.style.display = 'none'; targetGroup.style.display = 'flex';
+        });
 
         // === Quality Slider ===
-        qualitySlider.addEventListener('input', function() {
-            qualityValue.textContent = qualitySlider.value + '%';
-        });
+        qualitySlider.addEventListener('input', function() { qualityValue.textContent = qualitySlider.value + '%'; });
 
         // === Compression ===
         compressBtn.addEventListener('click', function() {
-            if (!originalFile) return;
+            if (!files.length) return;
             compressBtn.textContent = 'Compressing...';
             compressBtn.disabled = true;
-            compressImage(originalFile, parseInt(qualitySlider.value) / 100);
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+            compressedResults = [];
+            currentFileIdx = 0;
+            processNext();
         });
 
-        function compressImage(file, quality) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
+        function processNext() {
+            if (currentFileIdx >= files.length) {
+                compressBtn.textContent = 'Compress All';
+                compressBtn.disabled = false;
+                progressBar.style.display = 'none';
+                downloadAllBtn.disabled = false;
+                if (files.length === 1 && compressedResults[0]) {
+                    updatePreview(compressedResults[0]);
+                }
+                return;
+            }
+            var f = files[currentFileIdx];
+            var quality = parseInt(qualitySlider.value) / 100;
+            var outFormat = formatSelect.value;
+            if (currentMode === 'target') {
+                compressToTarget(f, outFormat, function(blob) { finishFile(blob); processNext(); });
+            } else {
+                compressWithQuality(f, quality, outFormat, function(blob) { finishFile(blob); processNext(); });
+            }
+        }
+
+        function finishFile(blob) {
+            compressedResults[currentFileIdx] = blob;
+            progressFill.style.width = ((currentFileIdx + 1) / files.length * 100) + '%';
+            currentFileIdx++;
+            showFile(Math.min(currentFileIdx, files.length - 1));
+        }
+
+        function compressWithQuality(file, quality, outFormat, cb) {
+            var r = new FileReader();
+            r.onload = function(e) {
+                var img = new Image();
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-
-                    const ctx = canvas.getContext('2d');
+                    var c = document.createElement('canvas');
+                    c.width = img.width; c.height = img.height;
+                    var ctx = c.getContext('2d');
                     ctx.drawImage(img, 0, 0);
-
-                    canvas.toBlob(function(blob) {
-                        compressedBlob = blob;
-
-                        const url = URL.createObjectURL(blob);
-                        compressedPreview.innerHTML = '<img src="' + url + '" alt="Compressed image preview" style="max-width:100%;max-height:300px;border-radius:8px;object-fit:contain;">';
-
-                        compressedInfo.textContent = formatSize(blob.size) + ' — ' + file.type.replace('image/', '').toUpperCase();
-
-                        origSize.textContent = formatSize(file.size);
-                        compSize.textContent = formatSize(blob.size);
-                        const reduction = ((file.size - blob.size) / file.size * 100).toFixed(1);
-                        savedPercent.textContent = reduction + '%';
-
-                        compressionStats.style.display = 'flex';
-                        downloadBtn.disabled = false;
-                        compressBtn.textContent = 'Compress Image';
-                        compressBtn.disabled = false;
-                    }, file.type, quality);
+                    var mime = outFormat === 'keep' ? file.type : outFormat;
+                    c.toBlob(function(blob) { cb(blob); }, mime, quality);
                 };
                 img.src = e.target.result;
             };
-            reader.readAsDataURL(file);
+            r.readAsDataURL(file);
+        }
+
+        function compressToTarget(file, outFormat, cb) {
+            var targetKB = parseFloat(targetSizeInput.value) || 100;
+            var targetBytes = targetKB * 1024;
+            var mime = outFormat === 'keep' ? file.type : outFormat;
+            var r = new FileReader();
+            r.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    var lo = 0.01, hi = 1.0, best = null, bestBlob = null;
+                    function tryQ() {
+                        if (lo > hi) { cb(bestBlob); return; }
+                        var mid = (lo + hi) / 2;
+                        var canvas = document.createElement('canvas');
+                        canvas.width = img.width; canvas.height = img.height;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        canvas.toBlob(function(blob) {
+                            if (!best || Math.abs(blob.size - targetBytes) < Math.abs(best.size - targetBytes)) {
+                                best = blob; bestBlob = blob;
+                            }
+                            if (blob.size > targetBytes) { hi = mid - 0.02; }
+                            else { lo = mid + 0.02; }
+                            if (lo > hi || Math.abs(blob.size - targetBytes) / targetBytes < 0.05) { cb(bestBlob); return; }
+                            tryQ();
+                        }, mime, mid);
+                    }
+                    tryQ();
+                };
+                img.src = e.target.result;
+            };
+            r.readAsDataURL(file);
+        }
+
+        function updatePreview(blob) {
+            var url = URL.createObjectURL(blob);
+            compressedPreview.innerHTML = '<img src="' + url + '" alt="Compressed preview" style="max-width:100%;max-height:300px;border-radius:8px;object-fit:contain">';
+            compressedInfo.textContent = formatSize(blob.size) + ' — ' + blob.type.replace('image/', '').toUpperCase();
+            if (files.length === 1) {
+                origSizeEl.textContent = formatSize(files[0].size);
+                compSizeEl.textContent = formatSize(blob.size);
+                savedPercent.textContent = ((files[0].size - blob.size) / files[0].size * 100).toFixed(1) + '%';
+                compressionStats.style.display = 'flex';
+                downloadBtn.disabled = false;
+            }
         }
 
         // === Download ===
         downloadBtn.addEventListener('click', function() {
-            if (!compressedBlob) return;
+            if (!compressedResults[currentFileIdx]) {
+                compressCurrentThenDownload();
+                return;
+            }
+            downloadBlob(compressedResults[currentFileIdx], files[currentFileIdx].name);
+        });
 
-            const url = URL.createObjectURL(compressedBlob);
-            const a = document.createElement('a');
+        function compressCurrentThenDownload() {
+            var f = files[currentFileIdx];
+            var quality = parseInt(qualitySlider.value) / 100;
+            var outFormat = formatSelect.value;
+            if (currentMode === 'target') {
+                compressToTarget(f, outFormat, function(blob) {
+                    compressedResults[currentFileIdx] = blob;
+                    updatePreview(blob);
+                    downloadBlob(blob, f.name);
+                });
+            } else {
+                compressWithQuality(f, quality, outFormat, function(blob) {
+                    compressedResults[currentFileIdx] = blob;
+                    updatePreview(blob);
+                    downloadBlob(blob, f.name);
+                });
+            }
+        }
+
+        function downloadBlob(blob, origName) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const ext = originalFile.name.split('.').pop();
-            const baseName = originalFile.name.replace(/\.[^.]+$/, '');
-            a.download = baseName + '-compressed.' + ext;
-
+            var base = origName.replace(/\.[^.]+$/, '');
+            var ext = blob.type.split('/')[1] || 'jpg';
+            a.download = base + '-compressed.' + ext;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // === Download All (ZIP) ===
+        downloadAllBtn.addEventListener('click', function() {
+            if (compressedResults.length === 0) return;
+            if (files.length === 1 && compressedResults[0]) {
+                downloadBlob(compressedResults[0], files[0].name);
+                return;
+            }
+            var zip = new JSZip();
+            var count = 0;
+            for (var i = 0; i < files.length; i++) {
+                if (compressedResults[i]) {
+                    var ext = compressedResults[i].type.split('/')[1] || 'jpg';
+                    var name = files[i].name.replace(/\.[^.]+$/, '') + '-compressed.' + ext;
+                    zip.file(name, compressedResults[i]);
+                    count++;
+                }
+            }
+            if (count === 0) { showToast('Please compress files first'); return; }
+            zip.generateAsync({ type: 'blob' }).then(function(b) {
+                downloadBlob(b, 'compressed-images.zip');
+            }).catch(function() { showToast('Failed to create ZIP'); });
         });
 
-        // === Toast ===
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(function() {
-                toast.classList.remove('show');
-            }, 2500);
-        }
+        // === Toast click dismiss ===
+        document.getElementById('toast').addEventListener('click', function() { this.classList.remove('show'); });
     })();
     </script>
 </body>
