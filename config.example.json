@@ -1,0 +1,18 @@
+{
+  "cloudflare": {
+    "api_token": "YOUR_CLOUDFLARE_API_TOKEN",
+    "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID"
+  },
+  "github": {
+    "token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN",
+    "username": "YOUR_GITHUB_USERNAME"
+  },
+  "google_analytics": {
+    "property_id": "G-XXXXXXXXXX"
+  },
+  "preferences": {
+    "namesilo_url": "https://www.namesilo.com/account/domains/",
+    "auto_open_browser": true,
+    "port": 8899
+  }
+}
