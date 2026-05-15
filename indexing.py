@@ -1,5 +1,6 @@
 """Google Indexing API — submits new URLs for faster crawling."""
 import json
+import os
 import time
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import requests
 BASE_DIR = Path(__file__).parent.resolve()
 DATA_DIR = BASE_DIR / "data"
 LOG_PATH = DATA_DIR / "indexing_log.json"
+
+PROXY_URL = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy")
 
 
 def _load_log():
@@ -49,6 +52,11 @@ def _batch_submit(urls, credentials_json_path=None, delay=1.0):
     if not creds_path.exists():
         return {"success": False, "error": f"Credentials file not found: {creds_path}", "results": []}
 
+    # Set up proxy-aware session
+    session = requests.Session()
+    if PROXY_URL:
+        session.proxies = {"http": PROXY_URL, "https": PROXY_URL}
+
     try:
         from google.oauth2 import service_account
         from google.auth.transport.requests import Request
@@ -57,7 +65,7 @@ def _batch_submit(urls, credentials_json_path=None, delay=1.0):
             str(creds_path),
             scopes=["https://www.googleapis.com/auth/indexing"],
         )
-        credentials.refresh(Request())
+        credentials.refresh(Request(session=session))
         token = credentials.token
     except ImportError:
         return {"success": False, "error": "Missing google-auth / google-auth-oauthlib. Run: pip install google-auth google-auth-oauthlib requests", "results": []}
@@ -75,11 +83,11 @@ def _batch_submit(urls, credentials_json_path=None, delay=1.0):
             continue
 
         try:
-            resp = requests.post(
+            resp = session.post(
                 "https://indexing.googleapis.com/v3/urlNotifications:publish",
                 json={"url": url, "type": "URL_UPDATED"},
                 headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-                timeout=20,
+                timeout=30,
             )
             data = resp.json() if resp.text else {}
             ok = resp.status_code == 200
