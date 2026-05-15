@@ -94,6 +94,20 @@ def generate_site(template_type, domain, ga_id=None, adsense_id=None, scene_page
         with open(output_dir / "index.html", "w", encoding="utf-8") as f:
             f.write(content)
 
+    # Inject scene navigation into homepage
+    if scene_pages:
+        index_path = output_dir / "index.html"
+        if index_path.exists():
+            with open(index_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            nav_html = _build_scene_nav(scene_pages, domain)
+            if "</main>" in content:
+                content = content.replace("</main>", nav_html + "\n</main>")
+            else:
+                content = content.replace("</body>", nav_html + "\n</body>")
+            with open(index_path, "w", encoding="utf-8") as f:
+                f.write(content)
+
     # Copy README if exists
     readme_src = template_dir / "README.md"
     if readme_src.exists():
@@ -152,6 +166,34 @@ def list_templates():
                 "tool_description": meta.get("tool_description", ""),
             })
     return templates
+
+
+def _build_scene_nav(scene_pages, domain):
+    """Build HTML block with links to all scene pages for homepage navigation."""
+    links = ""
+    for scene in scene_pages:
+        title = html.escape(scene["title"])
+        desc = html.escape(scene.get("scenario", title))
+        links += f'                <li><a href="/{scene["slug"]}/"><strong>{title}</strong><span>{desc}</span></a></li>\n'
+    return f"""        <section class="scene-nav" id="scenes">
+            <div class="container">
+                <h2>Free Online Image Tools</h2>
+                <p class="subtitle">More specialized tools for your specific needs</p>
+                <ul class="scene-grid">
+{links}                </ul>
+            </div>
+        </section>
+        <style>
+            .scene-nav{{padding:60px 0;background:#fff;border-top:1px solid #e2e8f0}}
+            .scene-nav h2{{text-align:center;font-size:2rem;margin-bottom:12px}}
+            .scene-nav .subtitle{{text-align:center;color:#64748b;margin-bottom:40px}}
+            .scene-grid{{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;max-width:960px;margin:0 auto;padding:0 24px}}
+            .scene-grid li{{}}
+            .scene-grid a{{display:block;padding:16px 20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;text-decoration:none;transition:all .15s}}
+            .scene-grid a:hover{{border-color:#2563eb;box-shadow:0 4px 12px rgba(37,99,235,0.1);transform:translateY(-1px)}}
+            .scene-grid strong{{display:block;color:#1e293b;font-size:1rem;margin-bottom:4px}}
+            .scene-grid span{{display:block;color:#64748b;font-size:.85rem}}
+        </style>"""
 
 
 def _build_sitemap(domain, scene_pages):
