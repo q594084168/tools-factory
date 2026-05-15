@@ -158,8 +158,15 @@ SCENE_POOLS = {
 }
 
 SIZE_VARIANTS = {
-    "image-compress": [20, 30, 50, 100, 150, 200, 250, 500, 1000],
-    "pdf-compress": [1, 2, 5, 10],
+    "image-compress": [
+        {"value": 20, "unit": "KB"}, {"value": 30, "unit": "KB"}, {"value": 50, "unit": "KB"},
+        {"value": 100, "unit": "KB"}, {"value": 150, "unit": "KB"}, {"value": 200, "unit": "KB"},
+        {"value": 250, "unit": "KB"}, {"value": 500, "unit": "KB"}, {"value": 1, "unit": "MB"},
+    ],
+    "pdf-compress": [
+        {"value": 1, "unit": "MB"}, {"value": 2, "unit": "MB"},
+        {"value": 5, "unit": "MB"}, {"value": 10, "unit": "MB"},
+    ],
 }
 
 SKELETON_CSS = """:root{--primary:#4F46E5;--primary-dark:#4338CA;--primary-light:#EEF2FF;--bg:#F8FAFC;--card-bg:#FFFFFF;--text:#1E293B;--text-secondary:#64748B;--border:#E2E8F0;--success:#10B981;--radius:12px;--radius-sm:8px;--shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.06);--shadow-lg:0 10px 15px -3px rgba(0,0,0,0.08),0 4px 6px -2px rgba(0,0,0,0.04)}
@@ -324,23 +331,27 @@ def generate_scene_variants(template_type, count=50):
             "parent_template": template_type,
         })
 
-    for kb in size_variants:
+    # Derive tool noun and verb from template_type for size-variant slugs
+    tool_noun = template_type.split("-")[0]  # "image", "pdf", etc.
+    tool_verb = "Compress" if "compress" in template_type else tool_noun.capitalize()
+
+    for sv in size_variants:
         if len(results) >= count:
             break
-        if kb >= 1000:
-            label = f"{kb // 1000} MB" if kb % 1000 == 0 else f"{kb / 1000:.1f} MB"
-        else:
-            label = f"{kb} KB"
-        slug = f"compress-image-to-{kb}kb"
-        title = f"Compress Image to {label} Online Free | {tool_title}"
-        desc = f"Compress any image to exactly {label}. {tool_description}"
+        v = sv["value"]
+        unit = sv["unit"]
+        unit_slug = unit.lower()
+        label = f"{v} {unit}"
+        slug = f"compress-{tool_noun}-to-{v}{unit_slug}"
+        title = f"{tool_verb} {tool_noun.capitalize()} to {label} Online Free | {tool_title}"
+        desc = f"Compress any {tool_noun} to exactly {label}. {tool_description}"
         results.append({
             "slug": slug,
             "title": title,
             "description": desc,
-            "scenario": f"Compress image to {label}",
+            "scenario": f"Compress {tool_noun} to {label}",
             "faqs": [
-                {"q": f"Can I compress an image to exactly {label}?", "a": f"Yes. Upload your image and set {label} as the target size. Our tool adjusts compression to hit your target."},
+                {"q": f"Can I compress a {tool_noun} to exactly {label}?", "a": f"Yes. Upload your {tool_noun} and set {label} as the target size. Our tool adjusts compression to hit your target."},
                 {"q": "Is this tool free?", "a": "Yes, completely free. No signup or credit card required."},
                 {"q": "Does it work on mobile?", "a": "Yes, works on phones, tablets, and desktop browsers."},
             ],
