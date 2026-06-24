@@ -1,0 +1,13 @@
+name: CI Check
+
+on:
+  push:
+    branches: [master, main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build check
+        run: echo "Repository ${{ github.event.repository.name }} is working"
